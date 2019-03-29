@@ -6,6 +6,14 @@
 #include "GameFramework/Actor.h"
 #include "OthelloBlock.generated.h"
 
+UENUM()
+enum BlockState
+{
+	None,
+	White,
+	Black
+};
+
 /** A block that can be clicked */
 UCLASS(minimalapi)
 class AOthelloBlock : public AActor
@@ -19,6 +27,10 @@ class AOthelloBlock : public AActor
 	/** StaticMesh component for the clickable block */
 	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* BlockMesh;
+
+	/** StaticMesh component for the stone put on block */
+	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* StoneMesh;
 
 public:
 	AOthelloBlock();
@@ -53,6 +65,12 @@ public:
 	void HandleClicked();
 
 	void Highlight(bool bOn);
+
+	void PutStone();
+
+	void ClearStone();
+
+	bool Hello;
 
 public:
 	/** Returns DummyRoot subobject **/

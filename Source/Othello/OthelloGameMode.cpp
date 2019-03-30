@@ -10,4 +10,6 @@ AOthelloGameMode::AOthelloGameMode()
 	DefaultPawnClass = AOthelloPawn::StaticClass();
 	// use our own player controller class
 	PlayerControllerClass = AOthelloPlayerController::StaticClass();
+
+	GameTurn = BlackTurn;
 }

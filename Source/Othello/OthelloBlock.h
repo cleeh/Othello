@@ -7,11 +7,11 @@
 #include "OthelloBlock.generated.h"
 
 UENUM()
-enum BlockState
+enum StoneColor
 {
 	None,
-	White,
-	Black
+	WhiteStone,
+	BlackStone
 };
 
 /** A block that can be clicked */
@@ -50,6 +50,14 @@ public:
 	UPROPERTY()
 	class UMaterialInstance* OrangeMaterial;
 
+	/** Pointer to white material used on white stone */
+	UPROPERTY()
+	class UMaterialInstance* WhiteMaterial;
+
+	/** Pointer to black material used on black stone */
+	UPROPERTY()
+	class UMaterialInstance* BlackMaterial;
+
 	/** Grid that owns us */
 	UPROPERTY()
 	class AOthelloBlockGrid* OwningGrid;
@@ -70,7 +78,8 @@ public:
 
 	void ClearStone();
 
-	bool Hello;
+	/** What stone is put on block? */
+	StoneColor WhatStone;
 
 public:
 	/** Returns DummyRoot subobject **/

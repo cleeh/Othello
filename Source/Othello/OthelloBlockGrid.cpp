@@ -4,6 +4,7 @@
 #include "OthelloBlock.h"
 #include "Components/TextRenderComponent.h"
 #include "Engine/World.h"
+#include "OthelloGameMode.h"
 
 #define LOCTEXT_NAMESPACE "PuzzleBlockGrid"
 

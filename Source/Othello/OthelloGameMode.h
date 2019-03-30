@@ -6,6 +6,13 @@
 #include "GameFramework/GameModeBase.h"
 #include "OthelloGameMode.generated.h"
 
+UENUM()
+enum ETurn
+{
+	BlackTurn,
+	WhiteTurn
+};
+
 /** GameMode class to specify pawn and playercontroller */
 UCLASS(minimalapi)
 class AOthelloGameMode : public AGameModeBase
@@ -14,6 +21,9 @@ class AOthelloGameMode : public AGameModeBase
 
 public:
 	AOthelloGameMode();
+
+	/** Who's turn? */
+	ETurn GameTurn;
 };
 
 

@@ -2,6 +2,7 @@
 
 #include "OthelloBlock.h"
 #include "OthelloBlockGrid.h"
+#include "OthelloGameMode.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -17,12 +18,16 @@ AOthelloBlock::AOthelloBlock()
 		ConstructorHelpers::FObjectFinderOptional<UMaterial> BaseMaterial;
 		ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> BlueMaterial;
 		ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> OrangeMaterial;
+		ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> WhiteMaterial;
+		ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> BlackMaterial;
 		FConstructorStatics()
 			: PlaneMesh(TEXT("/Game/Puzzle/Meshes/PuzzleCube.PuzzleCube"))
 			, CylinderMesh(TEXT("/Game/Puzzle/Meshes/CylinderMesh.CylinderMesh"))
 			, BaseMaterial(TEXT("/Game/Puzzle/Meshes/BaseMaterial.BaseMaterial"))
 			, BlueMaterial(TEXT("/Game/Puzzle/Meshes/BlueMaterial.BlueMaterial"))
 			, OrangeMaterial(TEXT("/Game/Puzzle/Meshes/OrangeMaterial.OrangeMaterial"))
+			, WhiteMaterial(TEXT("/Game/Puzzle/Meshes/WhiteMaterial.WhiteMaterial"))
+			, BlackMaterial(TEXT("/Game/Puzzle/Meshes/BlackMaterial.BlackMaterial"))
 		{
 		}
 	};
@@ -56,6 +61,8 @@ AOthelloBlock::AOthelloBlock()
 	BaseMaterial = ConstructorStatics.BaseMaterial.Get();
 	BlueMaterial = ConstructorStatics.BlueMaterial.Get();
 	OrangeMaterial = ConstructorStatics.OrangeMaterial.Get();
+	WhiteMaterial = ConstructorStatics.WhiteMaterial.Get();
+	BlackMaterial = ConstructorStatics.BlackMaterial.Get();
 
 	ClearStone();
 }
@@ -88,7 +95,7 @@ void AOthelloBlock::HandleClicked()
 		}
 	}
 	
-	if (Hello) ClearStone();
+	if (WhatStone) ClearStone();
 	else PutStone();
 }
 
@@ -112,12 +119,26 @@ void AOthelloBlock::Highlight(bool bOn)
 
 void AOthelloBlock::PutStone()
 {
+	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
+
+	switch (GameMode->GameTurn)
+	{
+	case BlackTurn:
+		StoneMesh->SetMaterial(0, BlackMaterial);
+		GameMode->GameTurn = WhiteTurn;
+		WhatStone = WhiteStone;
+		break;
+	case WhiteTurn:
+		StoneMesh->SetMaterial(0, WhiteMaterial);
+		GameMode->GameTurn = BlackTurn;
+		WhatStone = BlackStone;
+		break;
+	}
 	StoneMesh->SetVisibility(true);
-	Hello = true;
 }
 
 void AOthelloBlock::ClearStone()
 {
+	WhatStone = None;
 	StoneMesh->SetVisibility(false);
-	Hello = false;
 }

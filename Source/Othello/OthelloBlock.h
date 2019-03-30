@@ -76,6 +76,8 @@ public:
 
 	void PutStone();
 
+	void PutStone(StoneColor color);
+
 	void ClearStone();
 
 	/** What stone is put on block? */

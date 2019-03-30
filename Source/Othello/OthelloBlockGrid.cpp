@@ -22,7 +22,7 @@ AOthelloBlockGrid::AOthelloBlockGrid()
 	ScoreText->SetupAttachment(DummyRoot);
 
 	// Set defaults
-	Size = 3;
+	Size = 8;
 	BlockSpacing = 300.f;
 }
 
@@ -51,6 +51,11 @@ void AOthelloBlockGrid::BeginPlay()
 		{
 			NewBlock->OwningGrid = this;
 		}
+
+		if (BlockIndex / Size == 3 && BlockIndex % Size == 3 || BlockIndex / Size == 4 && BlockIndex % Size == 4)
+			NewBlock->PutStone(BlackStone);
+		else if (BlockIndex / Size == 3 && BlockIndex % Size == 4 || BlockIndex / Size == 4 && BlockIndex % Size == 3)
+			NewBlock->PutStone(WhiteStone);
 	}
 }
 

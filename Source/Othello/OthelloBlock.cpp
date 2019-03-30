@@ -80,21 +80,6 @@ void AOthelloBlock::OnFingerPressedBlock(ETouchIndex::Type FingerIndex, UPrimiti
 
 void AOthelloBlock::HandleClicked()
 {
-	// Check we are not already active
-	if (!bIsActive)
-	{
-		bIsActive = true;
-
-		// Change material
-		BlockMesh->SetMaterial(0, OrangeMaterial);
-
-		// Tell the Grid
-		if (OwningGrid != nullptr)
-		{
-			OwningGrid->AddScore();
-		}
-	}
-	
 	if (WhatStone) ClearStone();
 	else PutStone();
 }
@@ -109,7 +94,7 @@ void AOthelloBlock::Highlight(bool bOn)
 
 	if (bOn)
 	{
-		BlockMesh->SetMaterial(0, BaseMaterial);
+		BlockMesh->SetMaterial(0, OrangeMaterial);
 	}
 	else
 	{
@@ -126,12 +111,28 @@ void AOthelloBlock::PutStone()
 	case BlackTurn:
 		StoneMesh->SetMaterial(0, BlackMaterial);
 		GameMode->GameTurn = WhiteTurn;
-		WhatStone = WhiteStone;
+		WhatStone = BlackStone;
 		break;
 	case WhiteTurn:
 		StoneMesh->SetMaterial(0, WhiteMaterial);
 		GameMode->GameTurn = BlackTurn;
+		WhatStone = WhiteStone;
+		break;
+	}
+	StoneMesh->SetVisibility(true);
+}
+
+void AOthelloBlock::PutStone(StoneColor stone)
+{
+	switch (stone)
+	{
+	case BlackStone:
+		StoneMesh->SetMaterial(0, BlackMaterial);
 		WhatStone = BlackStone;
+		break;
+	case WhiteStone:
+		StoneMesh->SetMaterial(0, WhiteMaterial);
+		WhatStone = WhiteStone;
 		break;
 	}
 	StoneMesh->SetVisibility(true);

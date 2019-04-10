@@ -11,5 +11,5 @@ AOthelloGameMode::AOthelloGameMode()
 	// use our own player controller class
 	PlayerControllerClass = AOthelloPlayerController::StaticClass();
 
-	GameTurn = BlackTurn;
+	GameTurn = ETurn::Black;
 }

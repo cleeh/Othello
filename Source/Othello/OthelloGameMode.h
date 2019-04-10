@@ -7,10 +7,10 @@
 #include "OthelloGameMode.generated.h"
 
 UENUM()
-enum ETurn
+enum class ETurn
 {
-	BlackTurn,
-	WhiteTurn
+	Black,
+	White
 };
 
 /** GameMode class to specify pawn and playercontroller */

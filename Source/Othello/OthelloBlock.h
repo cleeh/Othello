@@ -7,11 +7,11 @@
 #include "OthelloBlock.generated.h"
 
 UENUM()
-enum StoneColor
+enum class EStoneColor
 {
 	None,
-	WhiteStone,
-	BlackStone
+	White,
+	Black
 };
 
 /** A block that can be clicked */
@@ -34,6 +34,8 @@ class AOthelloBlock : public AActor
 
 public:
 	AOthelloBlock();
+
+	int X, Y;
 
 	/** Are we currently active? */
 	bool bIsActive;
@@ -76,12 +78,14 @@ public:
 
 	void PutStone();
 
-	void PutStone(StoneColor color);
+	void PutStone(EStoneColor color);
 
 	void ClearStone();
 
+	void ChangeStone();
+
 	/** What stone is put on block? */
-	StoneColor WhatStone;
+	EStoneColor WhatStoneColor;
 
 public:
 	/** Returns DummyRoot subobject **/

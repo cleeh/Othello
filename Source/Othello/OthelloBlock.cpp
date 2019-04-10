@@ -64,6 +64,9 @@ AOthelloBlock::AOthelloBlock()
 	WhiteMaterial = ConstructorStatics.WhiteMaterial.Get();
 	BlackMaterial = ConstructorStatics.BlackMaterial.Get();
 
+	X = -1;
+	Y = -1;
+
 	ClearStone();
 }
 
@@ -80,8 +83,12 @@ void AOthelloBlock::OnFingerPressedBlock(ETouchIndex::Type FingerIndex, UPrimiti
 
 void AOthelloBlock::HandleClicked()
 {
-	if (WhatStone) ClearStone();
-	else PutStone();
+	if (WhatStoneColor != EStoneColor::None) ClearStone();
+	else
+	{
+		PutStone();
+		OwningGrid->ChangeStonesColor(X, Y);
+	}
 }
 
 void AOthelloBlock::Highlight(bool bOn)
@@ -108,31 +115,31 @@ void AOthelloBlock::PutStone()
 
 	switch (GameMode->GameTurn)
 	{
-	case BlackTurn:
+	case ETurn::Black:
 		StoneMesh->SetMaterial(0, BlackMaterial);
-		GameMode->GameTurn = WhiteTurn;
-		WhatStone = BlackStone;
+		GameMode->GameTurn = ETurn::White;
+		WhatStoneColor = EStoneColor::Black;
 		break;
-	case WhiteTurn:
+	case ETurn::White:
 		StoneMesh->SetMaterial(0, WhiteMaterial);
-		GameMode->GameTurn = BlackTurn;
-		WhatStone = WhiteStone;
+		GameMode->GameTurn = ETurn::Black;
+		WhatStoneColor = EStoneColor::White;
 		break;
 	}
 	StoneMesh->SetVisibility(true);
 }
 
-void AOthelloBlock::PutStone(StoneColor stone)
+void AOthelloBlock::PutStone(EStoneColor stone)
 {
 	switch (stone)
 	{
-	case BlackStone:
+	case EStoneColor::Black:
 		StoneMesh->SetMaterial(0, BlackMaterial);
-		WhatStone = BlackStone;
+		WhatStoneColor = EStoneColor::Black;
 		break;
-	case WhiteStone:
+	case EStoneColor::White:
 		StoneMesh->SetMaterial(0, WhiteMaterial);
-		WhatStone = WhiteStone;
+		WhatStoneColor = EStoneColor::White;
 		break;
 	}
 	StoneMesh->SetVisibility(true);
@@ -140,6 +147,12 @@ void AOthelloBlock::PutStone(StoneColor stone)
 
 void AOthelloBlock::ClearStone()
 {
-	WhatStone = None;
+	WhatStoneColor = EStoneColor::None;
 	StoneMesh->SetVisibility(false);
+}
+
+void AOthelloBlock::ChangeStone()
+{
+	if (WhatStoneColor == EStoneColor::White) PutStone(EStoneColor::Black);
+	else if (WhatStoneColor == EStoneColor::Black) PutStone(EStoneColor::White);
 }

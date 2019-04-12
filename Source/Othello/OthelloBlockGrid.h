@@ -48,7 +48,7 @@ public:
 	/** Handle the block being clicked */
 	void AddScore();
 
-	/** Check whether player's stones surround opponent's stones */
+	/** Change color of stones which lie on 8-directions */
 	void ChangeStonesColor(uint8 stone_x, uint8 stone_y);
 
 	/** Get block on (x, y) */

@@ -65,7 +65,6 @@ void AOthelloBlockGrid::BeginPlay()
 	}
 }
 
-
 void AOthelloBlockGrid::AddScore()
 {
 	// Increment score
@@ -82,111 +81,262 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 	if (target_color == EStoneColor::Black) other_color = EStoneColor::White;
 	else if (target_color == EStoneColor::White) other_color = EStoneColor::Black;
 
-	TArray<bool> StoneToChange; // 개선이 필요하다
+	TArray<bool> StoneToChange;
 	StoneToChange.Empty();
 	StoneToChange.SetNum(Size*Size);
 
-	// Western
+	// West
 	for (int x = stone_x - 1; x >= 0; x--)
 	{
-		// same stone color
-		if (GetBlock(x, stone_y)->WhatStoneColor == target_color)
-		{
-			break;
-		}
-		// other stone color
-		else if (GetBlock(x, stone_y)->WhatStoneColor == other_color)
-		{
-			if (x > 0) StoneToChange[stone_y*Size + x] = true;
-			else
-			{
-				for (int i = 0; i < stone_x; i++) StoneToChange[stone_y*Size + i] = false;
-				break;
-			}
-		}
-		// no stone
-		else if (GetBlock(x, stone_y)->WhatStoneColor == EStoneColor::None)
-		{
-			for (int i = x; i < stone_x; i++) StoneToChange[stone_y*Size + i] = false;
-			break;
-		}
-	}
+		AOthelloBlock* Target = GetBlock(x, stone_y);
 
-	// Eastern
-	for (int x = stone_x +1; x < Size; x++)
-	{
-		// same stone color
-		if (GetBlock(x, stone_y)->WhatStoneColor == target_color)
-		{
-			break;
-		}
-		// other stone color
-		else if (GetBlock(x, stone_y)->WhatStoneColor == other_color)
-		{
-			if (x < Size - 1) StoneToChange[stone_y*Size + x] = true;
-			else
-			{
-				for (int i = Size - 1; i > stone_x; i--) StoneToChange[stone_y*Size + i] = false;
-				break;
-			}
-		}
-		// no stone
-		else if (GetBlock(x, stone_y)->WhatStoneColor == EStoneColor::None)
-		{
-			for (int i = x; i > stone_x; i--) StoneToChange[stone_y*Size + i] = false;
-			break;
-		}
-	}
-
-	// Northern
-	for (int y = stone_y + 1; y < Size; y++)
-	{
-		// same stone color
-		if (GetBlock(stone_x, y)->WhatStoneColor == target_color)
-		{
-			break;
-		}
-		// other stone color
-		else if (GetBlock(stone_x, y)->WhatStoneColor == other_color)
-		{
-			if (y < Size - 1) StoneToChange[y*Size + stone_x] = true;
-			else
-			{
-				for (int i = Size - 1; i > stone_y; i--) StoneToChange[i*Size + stone_x] = false;
-				break;
-			}
-		}
-		// no stone
-		else if (GetBlock(stone_x, y)->WhatStoneColor == EStoneColor::None)
-		{
-			for (int i = y; i > stone_y; i--) StoneToChange[i*Size + stone_x] = false;
-		}
-	}
-
-	// Southern
-	for (int y = stone_y - 1; y >= 0; y--)
-	{
-		if (GetBlock(stone_x, y))
+		if (Target)
 		{
 			// same stone color
-			if (GetBlock(stone_x, y)->WhatStoneColor == target_color)
+			if (Target->WhatStoneColor == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (GetBlock(stone_x, y)->WhatStoneColor == other_color)
+			else if (Target->WhatStoneColor == other_color)
 			{
-				if (y > 0) StoneToChange[y*Size + stone_x] = true;
+				if (x > 0) StoneToChange[stone_y*Size + x] = true;
 				else
 				{
-					for (int i = 0; i < stone_y; i++) StoneToChange[i*Size + stone_x] = false;
+					for (int i = 0; i < stone_x; i++) StoneToChange[stone_y*Size + i] = false;
 					break;
 				}
 			}
 			// no stone
-			else if (GetBlock(stone_x, y)->WhatStoneColor == EStoneColor::None)
+			else if (Target->WhatStoneColor == EStoneColor::None)
 			{
-				for (int i = y; i < stone_y; i++) StoneToChange[i*Size + stone_x] = false;
+				for (int i = x; i < stone_x; i++) StoneToChange[stone_y*Size + i] = false;
+				break;
+			}
+		}
+	}
+
+	// East
+	for (int x = stone_x +1; x < Size; x++)
+	{
+		AOthelloBlock* Target = GetBlock(x, stone_y);
+
+		if (Target)
+		{
+			// same stone color
+			if (Target->WhatStoneColor == target_color)
+			{
+				break;
+			}
+			// other stone color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				if (x < Size - 1) StoneToChange[stone_y*Size + x] = true;
+				else
+				{
+					for (int i = Size - 1; i > stone_x; i--) StoneToChange[stone_y*Size + i] = false;
+					break;
+				}
+			}
+			// no stone
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				for (int i = x; i > stone_x; i--) StoneToChange[stone_y*Size + i] = false;
+				break;
+			}
+		}
+	}
+
+	// North
+	for (int y = stone_y + 1; y < Size; y++)
+	{
+		AOthelloBlock* Target = GetBlock(stone_x, y);
+
+		if (Target)
+		{
+			// same stone color
+			if (Target->WhatStoneColor == target_color)
+			{
+				break;
+			}
+			// other stone color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				if (y < Size - 1) StoneToChange[y*Size + stone_x] = true;
+				else
+				{
+					for (int j = Size - 1; j > stone_y; j--) StoneToChange[j*Size + stone_x] = false;
+					break;
+				}
+			}
+			// no stone
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				for (int j = y; j > stone_y; j--) StoneToChange[j*Size + stone_x] = false;
+				break;
+			}
+		}
+	}
+
+	// South
+	for (int y = stone_y - 1; y >= 0; y--)
+	{
+		AOthelloBlock* Target = GetBlock(stone_x, y);
+
+		if (Target)
+		{
+			// same stone color
+			if (Target->WhatStoneColor == target_color)
+			{
+				break;
+			}
+			// other stone color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				if (y > 0) StoneToChange[y*Size + stone_x] = true;
+				else
+				{
+					for (int j = 0; j < stone_y; j++) StoneToChange[j*Size + stone_x] = false;
+					break;
+				}
+			}
+			// no stone
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				for (int j = y; j < stone_y; j++) StoneToChange[j*Size + stone_x] = false;
+				break;
+			}
+		}
+	}
+
+	// Northern-West
+	for (int x = stone_x - 1, y = stone_y + 1; x >= 0 && y < Size; x--, y++)
+	{
+		AOthelloBlock* Target = GetBlock(x, y);
+
+		if (Target)
+		{
+			// same stone color
+			if (Target->WhatStoneColor == target_color)
+			{
+				break;
+			}
+			// other stone color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				if (y < Size - 1 && x > 0) StoneToChange[y*Size + x] = true;
+				else
+				{
+					for (int i = stone_x - 1, j = stone_y + 1; i > 0 && j < Size - 1; i--, j++)
+						StoneToChange[j*Size + i] = false;
+					break;
+				}
+			}
+			// no stone
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				for (int i = stone_x - 1, j = stone_y + 1; i > 0 && j < Size - 1; i--, j++)
+					StoneToChange[j*Size + i] = false;
+				break;
+			}
+		}
+	}
+
+	// Northern-East
+	for (int x = stone_x + 1, y = stone_y + 1; x < Size && y < Size; x++, y++)
+	{
+		AOthelloBlock* Target = GetBlock(x, y);
+
+		if (Target)
+		{
+			// same stone color
+			if (Target->WhatStoneColor == target_color)
+			{
+				break;
+			}
+			// other stone color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				if (y < Size - 1 && x < Size - 1) StoneToChange[y*Size + x] = true;
+				else
+				{
+					for (int i = stone_x + 1, j = stone_y + 1; i < Size - 1 && j < Size - 1; i++, j++)
+						StoneToChange[j*Size + i] = false;
+					break;
+				}
+			}
+			// no stone
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				for (int i = stone_x + 1, j = stone_y + 1; i < Size - 1 && j < Size - 1; i++, j++)
+					StoneToChange[j*Size + i] = false;
+				break;
+			}
+		}
+	}
+
+	// Southern-West
+	for (int x = stone_x - 1, y = stone_y - 1; x >= 0 && y >= 0; x--, y--)
+	{
+		AOthelloBlock* Target = GetBlock(x, y);
+
+		if (Target)
+		{
+			// same stone color
+			if (Target->WhatStoneColor == target_color)
+			{
+				break;
+			}
+			// other stone color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				if (y > 0 && x > 0) StoneToChange[y*Size + x] = true;
+				else
+				{
+					for (int i = stone_x - 1, j = stone_y - 1; i > 0 && j > 0; i--, j--)
+						StoneToChange[j*Size + i] = false;
+					break;
+				}
+			}
+			// no stone
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				for (int i = stone_x - 1, j = stone_y - 1; i > 0 && j > 0; i--, j--)
+					StoneToChange[j*Size + i] = false;
+				break;
+			}
+		}
+	}
+
+	// Southern-East
+	for (int x = stone_x + 1, y = stone_y - 1; x < Size && y >= 0; x++, y--)
+	{
+		AOthelloBlock* Target = GetBlock(x, y);
+
+		if (Target)
+		{
+			// same stone color
+			if (Target->WhatStoneColor == target_color)
+			{
+				break;
+			}
+			// other stone color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				if (y > 0 && x < Size - 1) StoneToChange[y*Size + x] = true;
+				else
+				{
+					for (int i = stone_x + 1, j = stone_y - 1; i < Size - 1 && j > 0; i++, j--)
+						StoneToChange[j*Size + i] = false;
+					break;
+				}
+			}
+			// no stone
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				for (int i = stone_x + 1, j = stone_y - 1; i < Size - 1 && j > 0; i++, j--)
+					StoneToChange[j*Size + i] = false;
+				break;
 			}
 		}
 	}

@@ -86,8 +86,11 @@ void AOthelloBlock::HandleClicked()
 	if (WhatStoneColor != EStoneColor::None) ClearStone();
 	else
 	{
-		PutStone();
-		OwningGrid->ChangeStonesColor(X, Y);
+		if (OwningGrid->CheckPossibility(X, Y))
+		{
+			PutStone();
+			OwningGrid->ChangeStonesColor(X, Y);
+		}
 	}
 }
 
@@ -113,20 +116,27 @@ void AOthelloBlock::PutStone()
 {
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 
-	switch (GameMode->GameTurn)
+	if (GameMode)
 	{
-	case ETurn::Black:
-		StoneMesh->SetMaterial(0, BlackMaterial);
-		GameMode->GameTurn = ETurn::White;
-		WhatStoneColor = EStoneColor::Black;
-		break;
-	case ETurn::White:
-		StoneMesh->SetMaterial(0, WhiteMaterial);
-		GameMode->GameTurn = ETurn::Black;
-		WhatStoneColor = EStoneColor::White;
-		break;
+		switch (GameMode->GameTurn)
+		{
+		case ETurn::Black:
+			StoneMesh->SetMaterial(0, BlackMaterial);
+			GameMode->GameTurn = ETurn::White;
+			WhatStoneColor = EStoneColor::Black;
+			break;
+		case ETurn::White:
+			StoneMesh->SetMaterial(0, WhiteMaterial);
+			GameMode->GameTurn = ETurn::Black;
+			WhatStoneColor = EStoneColor::White;
+			break;
+		}
+		StoneMesh->SetVisibility(true);
 	}
-	StoneMesh->SetVisibility(true);
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is no Gamemode"));
+	}
 }
 
 void AOthelloBlock::PutStone(EStoneColor stone)

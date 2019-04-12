@@ -15,11 +15,11 @@ AOthelloBlockGrid::AOthelloBlockGrid()
 	RootComponent = DummyRoot;
 
 	// Create static mesh component
-	ScoreText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ScoreText0"));
-	ScoreText->SetRelativeLocation(FVector(200.f,0.f,0.f));
-	ScoreText->SetRelativeRotation(FRotator(90.f,0.f,0.f));
-	ScoreText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(0)));
-	ScoreText->SetupAttachment(DummyRoot);
+	TurnText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ScoreText0"));
+	TurnText->SetRelativeLocation(FVector(200.f,0.f,0.f));
+	TurnText->SetRelativeRotation(FRotator(90.f,0.f,0.f));
+	TurnText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(0)));
+	TurnText->SetupAttachment(DummyRoot);
 
 	// Set defaults
 	Size = 8;
@@ -65,13 +65,208 @@ void AOthelloBlockGrid::BeginPlay()
 	}
 }
 
-void AOthelloBlockGrid::AddScore()
+bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 {
-	// Increment score
-	Score++;
+	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
+	EStoneColor target_color;
+	EStoneColor other_color;
+	if (GameMode->GameTurn == ETurn::Black)	target_color = EStoneColor::Black;
+	else if (GameMode->GameTurn == ETurn::White) target_color = EStoneColor::White;
+	if (target_color == EStoneColor::Black) other_color = EStoneColor::White;
+	else if (target_color == EStoneColor::White) other_color = EStoneColor::Black;
 
-	// Update text
-	ScoreText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(Score)));
+	if (GetBlock(start_x, start_y)->WhatStoneColor != EStoneColor::None)
+	{
+		return false;
+	}
+	else
+	{
+		// West
+		bool Flag = false;
+		for (int x = start_x - 1; x >= 0; x--)
+		{
+			AOthelloBlock* Target = GetBlock(x, start_y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+
+		// East
+		Flag = false;
+		for (int x = start_x + 1; x < Size; x++)
+		{
+			AOthelloBlock* Target = GetBlock(x, start_y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+
+		// South
+		Flag = false;
+		for (int y = start_y - 1; y >= 0; y--)
+		{
+			AOthelloBlock* Target = GetBlock(start_x, y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+
+		// North
+		Flag = false;
+		for (int y = start_y + 1; y < Size; y++)
+		{
+			AOthelloBlock* Target = GetBlock(start_x, y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+
+		// Northern-West
+		Flag = false;
+		for (int x = start_x - 1, y = start_y + 1; x >= 0 && y < Size; x--, y++)
+		{
+			AOthelloBlock* Target = GetBlock(x, y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+
+		// Northern-East
+		Flag = false;
+		for (int x = start_x + 1, y = start_y + 1; x < Size && y < Size; x++, y++)
+		{
+			AOthelloBlock* Target = GetBlock(x, y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+
+		// Southern-West
+		Flag = false;
+		for (int x = start_x - 1, y = start_y - 1; x >= 0 && y >= 0; x--, y--)
+		{
+			AOthelloBlock* Target = GetBlock(x, y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+
+		// Southern-East
+		Flag = false;
+		for (int x = start_x + 1, y = start_y - 1; x < Size && y >= 0; x++, y--)
+		{
+			AOthelloBlock* Target = GetBlock(x, y);
+
+			// same color
+			if (Target->WhatStoneColor == target_color)
+			{
+				if (Flag) return true;
+			}
+			// other color
+			else if (Target->WhatStoneColor == other_color)
+			{
+				Flag = true;
+			}
+			// no color
+			else if (Target->WhatStoneColor == EStoneColor::None)
+			{
+				break;
+			}
+		}
+	}
+
+	return false;
 }
 
 void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)

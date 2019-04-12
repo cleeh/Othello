@@ -19,7 +19,7 @@ class AOthelloBlockGrid : public AActor
 
 	/** Text component for the score */
 	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UTextRenderComponent* ScoreText;
+	class UTextRenderComponent* TurnText;
 
 public:
 	AOthelloBlockGrid();
@@ -45,8 +45,7 @@ protected:
 
 public:
 
-	/** Handle the block being clicked */
-	void AddScore();
+	bool CheckPossibility(uint8 start_x, uint8 start_y);
 
 	/** Change color of stones which lie on 8-directions */
 	void ChangeStonesColor(uint8 stone_x, uint8 stone_y);
@@ -57,7 +56,7 @@ public:
 	/** Returns DummyRoot subobject **/
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 	/** Returns ScoreText subobject **/
-	FORCEINLINE class UTextRenderComponent* GetScoreText() const { return ScoreText; }
+	FORCEINLINE class UTextRenderComponent* GetTurnText() const { return TurnText; }
 };
 
 

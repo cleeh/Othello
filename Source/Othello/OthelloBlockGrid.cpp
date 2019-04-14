@@ -26,7 +26,6 @@ AOthelloBlockGrid::AOthelloBlockGrid()
 	BlockSpacing = 300.f;
 }
 
-
 void AOthelloBlockGrid::BeginPlay()
 {
 	Super::BeginPlay();
@@ -70,12 +69,12 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 	EStoneColor target_color;
 	EStoneColor other_color;
-	if (GameMode->GameTurn == ETurn::Black)	target_color = EStoneColor::Black;
-	else if (GameMode->GameTurn == ETurn::White) target_color = EStoneColor::White;
+	if (GameMode->GetTurn() == ETurn::Black)	target_color = EStoneColor::Black;
+	else if (GameMode->GetTurn() == ETurn::White) target_color = EStoneColor::White;
 	if (target_color == EStoneColor::Black) other_color = EStoneColor::White;
 	else if (target_color == EStoneColor::White) other_color = EStoneColor::Black;
 
-	if (GetBlock(start_x, start_y)->WhatStoneColor != EStoneColor::None)
+	if (GetBlock(start_x, start_y)->GetStoneColor() != EStoneColor::None)
 	{
 		return false;
 	}
@@ -88,17 +87,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(x, start_y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -111,17 +111,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(x, start_y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -134,17 +135,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(start_x, y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -157,17 +159,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(start_x, y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -180,17 +183,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(x, y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -203,17 +207,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(x, y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -226,17 +231,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(x, y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -249,17 +255,18 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 			AOthelloBlock* Target = GetBlock(x, y);
 
 			// same color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				if (Flag) return true;
+				else break;
 			}
 			// other color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				Flag = true;
 			}
 			// no color
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				break;
 			}
@@ -271,7 +278,7 @@ bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
 
 void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 {
-	EStoneColor target_color = GetBlock(stone_x, stone_y)->WhatStoneColor;
+	EStoneColor target_color = GetBlock(stone_x, stone_y)->GetStoneColor();
 	EStoneColor other_color;
 	if (target_color == EStoneColor::Black) other_color = EStoneColor::White;
 	else if (target_color == EStoneColor::White) other_color = EStoneColor::Black;
@@ -288,12 +295,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (x > 0) StoneToChange[stone_y*Size + x] = true;
 				else
@@ -303,7 +310,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int i = x; i < stone_x; i++) StoneToChange[stone_y*Size + i] = false;
 				break;
@@ -319,12 +326,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (x < Size - 1) StoneToChange[stone_y*Size + x] = true;
 				else
@@ -334,7 +341,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int i = x; i > stone_x; i--) StoneToChange[stone_y*Size + i] = false;
 				break;
@@ -350,12 +357,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (y < Size - 1) StoneToChange[y*Size + stone_x] = true;
 				else
@@ -365,7 +372,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int j = y; j > stone_y; j--) StoneToChange[j*Size + stone_x] = false;
 				break;
@@ -381,12 +388,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (y > 0) StoneToChange[y*Size + stone_x] = true;
 				else
@@ -396,7 +403,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int j = y; j < stone_y; j++) StoneToChange[j*Size + stone_x] = false;
 				break;
@@ -412,12 +419,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (y < Size - 1 && x > 0) StoneToChange[y*Size + x] = true;
 				else
@@ -428,7 +435,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int i = stone_x - 1, j = stone_y + 1; i > 0 && j < Size - 1; i--, j++)
 					StoneToChange[j*Size + i] = false;
@@ -445,12 +452,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (y < Size - 1 && x < Size - 1) StoneToChange[y*Size + x] = true;
 				else
@@ -461,7 +468,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int i = stone_x + 1, j = stone_y + 1; i < Size - 1 && j < Size - 1; i++, j++)
 					StoneToChange[j*Size + i] = false;
@@ -478,12 +485,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (y > 0 && x > 0) StoneToChange[y*Size + x] = true;
 				else
@@ -494,7 +501,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int i = stone_x - 1, j = stone_y - 1; i > 0 && j > 0; i--, j--)
 					StoneToChange[j*Size + i] = false;
@@ -511,12 +518,12 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		if (Target)
 		{
 			// same stone color
-			if (Target->WhatStoneColor == target_color)
+			if (Target->GetStoneColor() == target_color)
 			{
 				break;
 			}
 			// other stone color
-			else if (Target->WhatStoneColor == other_color)
+			else if (Target->GetStoneColor() == other_color)
 			{
 				if (y > 0 && x < Size - 1) StoneToChange[y*Size + x] = true;
 				else
@@ -527,7 +534,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 				}
 			}
 			// no stone
-			else if (Target->WhatStoneColor == EStoneColor::None)
+			else if (Target->GetStoneColor() == EStoneColor::None)
 			{
 				for (int i = stone_x + 1, j = stone_y - 1; i < Size - 1 && j > 0; i++, j--)
 					StoneToChange[j*Size + i] = false;
@@ -541,6 +548,67 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 			if (StoneToChange[y*Size + x]) GetBlock(x, y)->ChangeStone();
 }
 
+bool AOthelloBlockGrid::CheckGameOver()
+{
+	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
+
+	// Check whether board is full of stones
+	if (GameMode->GetTurnCount() > Size * Size - 4)
+	{
+		return true;
+	}
+
+	// Check whether colors of all stone are same each other
+	if (GameMode->GetTurnCount() <= Size * Size - 4)
+	{
+		uint16 WhiteStoneCount = 0;
+		uint16 BlackStoneCount = 0;
+
+		for (int y = 0; y < Size; y++)
+		{
+			for (int x = 0; x < Size; x++)
+			{
+				AOthelloBlock* Target = GetBlock(x, y);
+
+				if (Target->GetStoneColor() == EStoneColor::White) WhiteStoneCount++;
+				else if (Target->GetStoneColor() == EStoneColor::Black) BlackStoneCount++;
+			}
+		}
+		if ((WhiteStoneCount == 0 && BlackStoneCount > 0) || (WhiteStoneCount > 0 && BlackStoneCount == 0))
+		{
+			return true;
+		}
+	}
+
+	// Check whether there is no location stones can be put on
+	for (int y = 0, count = 0; y < Size; y++)
+	{
+		for (int x = 0; x < Size; x++)
+		{
+			bool IsPossible = CheckPossibility(x, y);
+
+			// found location stone can be put on
+			if (IsPossible)
+			{
+				return false;
+			}
+			// find more possible location
+			else if (!IsPossible && count < Size * Size - 1)
+			{
+				count++;
+			}
+			// there is no location stone can be put on
+			else
+			{
+				GameMode->OmitTurn();
+				if (GameMode->GetTurnOmit()) return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 AOthelloBlock* AOthelloBlockGrid::GetBlock(uint8 x, uint8 y)
 {
 	const int target = x * Size + y;
@@ -548,6 +616,12 @@ AOthelloBlock* AOthelloBlockGrid::GetBlock(uint8 x, uint8 y)
 		return BlockArray[target];
 
 	return nullptr;
+}
+
+void AOthelloBlockGrid::AfterPutStone()
+{
+	if (CheckGameOver())
+		Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode())->GameOver();
 }
 
 #undef LOCTEXT_NAMESPACE

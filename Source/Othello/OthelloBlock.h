@@ -32,6 +32,10 @@ class AOthelloBlock : public AActor
 	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* StoneMesh;
 
+private:
+	/** What stone is put on block? */
+	EStoneColor WhatStoneColor;
+
 public:
 	AOthelloBlock();
 
@@ -72,26 +76,30 @@ public:
 	UFUNCTION()
 	void OnFingerPressedBlock(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent);
 
+	/** Activated when instances of this class are clicked */
 	void HandleClicked();
 
 	void Highlight(bool bOn);
 
+	/** Put a stone on block & update variables */
 	void PutStone();
 
+	/** Put a stone having specific color on block manually */
 	void PutStone(EStoneColor color);
 
+	/** Clear stone on block & update variables */
 	void ClearStone();
 
+	/** Change color of stone on block according to present status */
 	void ChangeStone();
-
-	/** What stone is put on block? */
-	EStoneColor WhatStoneColor;
 
 public:
 	/** Returns DummyRoot subobject **/
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 	/** Returns BlockMesh subobject **/
 	FORCEINLINE class UStaticMeshComponent* GetBlockMesh() const { return BlockMesh; }
+	/** Returns 'WhatStoneColor' */
+	FORCEINLINE EStoneColor GetStoneColor() const { return WhatStoneColor; }
 };
 
 

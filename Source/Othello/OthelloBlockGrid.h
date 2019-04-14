@@ -35,6 +35,9 @@ public:
 	UPROPERTY(Category=Grid, EditAnywhere, BlueprintReadOnly)
 	float BlockSpacing;
 
+	/** Activated after 'AOthelloBlock::PutStone()' activates */
+	void AfterPutStone();
+
 protected:
 	// Begin AActor interface
 	virtual void BeginPlay() override;
@@ -44,11 +47,20 @@ protected:
 	TArray<AOthelloBlock*> BlockArray;
 
 public:
-
+	/** Check stone can be put on (start_x, start_y)
+	 * @return true stone can be put on this position
+	 * @return false stone can't be put on this position
+	 */
 	bool CheckPossibility(uint8 start_x, uint8 start_y);
 
 	/** Change color of stones which lie on 8-directions */
 	void ChangeStonesColor(uint8 stone_x, uint8 stone_y);
+
+	/** Check whether game is over or not
+	 * @return true game is over
+	 * @return false game is not over
+	 */
+	bool CheckGameOver();
 
 	/** Get block on (x, y) */
 	AOthelloBlock* GetBlock(uint8 x, uint8 y);
@@ -58,6 +70,3 @@ public:
 	/** Returns ScoreText subobject **/
 	FORCEINLINE class UTextRenderComponent* GetTurnText() const { return TurnText; }
 };
-
-
-

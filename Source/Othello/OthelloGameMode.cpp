@@ -11,5 +11,38 @@ AOthelloGameMode::AOthelloGameMode()
 	// use our own player controller class
 	PlayerControllerClass = AOthelloPlayerController::StaticClass();
 
+	GameStatus = EGameStatus::Play;
 	GameTurn = ETurn::Black;
+	GameTurnCount = 1;
+
+	IsTurnOmitted = false;
+}
+
+uint16 AOthelloGameMode::OmitTurn()
+{
+	// game is over if previous turn is omitted for reason that previous player can't put stone on any location
+	if (IsTurnOmitted) GameOver();
+	// checksum reset if not
+	else IsTurnOmitted = true;
+
+	if (GameTurn == ETurn::White) GameTurn = ETurn::Black;
+	else if (GameTurn == ETurn::Black) GameTurn = ETurn::White;
+
+	return GameTurnCount;
+}
+
+uint16 AOthelloGameMode::NextTurn()
+{
+	IsTurnOmitted = false;
+
+	if (GameTurn == ETurn::White) GameTurn = ETurn::Black;
+	else if (GameTurn == ETurn::Black) GameTurn = ETurn::White;
+
+	return ++GameTurnCount;
+}
+
+void AOthelloGameMode::GameOver()
+{
+	GameStatus = EGameStatus::GameOver;
+	UE_LOG(LogTemp, Error, TEXT("Game Over"), TEXT("GameMode"));
 }

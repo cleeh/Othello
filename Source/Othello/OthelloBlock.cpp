@@ -83,13 +83,15 @@ void AOthelloBlock::OnFingerPressedBlock(ETouchIndex::Type FingerIndex, UPrimiti
 
 void AOthelloBlock::HandleClicked()
 {
-	if (WhatStoneColor != EStoneColor::None) ClearStone();
+	if (WhatStoneColor != EStoneColor::None); //ClearStone();
 	else
 	{
 		if (OwningGrid->CheckPossibility(X, Y))
 		{
 			PutStone();
 			OwningGrid->ChangeStonesColor(X, Y);
+
+			OwningGrid->AfterPutStone();
 		}
 	}
 }
@@ -118,19 +120,18 @@ void AOthelloBlock::PutStone()
 
 	if (GameMode)
 	{
-		switch (GameMode->GameTurn)
+		switch (GameMode->GetTurn())
 		{
 		case ETurn::Black:
 			StoneMesh->SetMaterial(0, BlackMaterial);
-			GameMode->GameTurn = ETurn::White;
 			WhatStoneColor = EStoneColor::Black;
 			break;
 		case ETurn::White:
 			StoneMesh->SetMaterial(0, WhiteMaterial);
-			GameMode->GameTurn = ETurn::Black;
 			WhatStoneColor = EStoneColor::White;
 			break;
 		}
+		UE_LOG(LogTemp, Warning, TEXT("%d"), GameMode->NextTurn());
 		StoneMesh->SetVisibility(true);
 	}
 	else

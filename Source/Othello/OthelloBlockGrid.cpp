@@ -16,8 +16,8 @@ AOthelloBlockGrid::AOthelloBlockGrid()
 
 	// Create static mesh component
 	TurnText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ScoreText0"));
-	TurnText->SetRelativeLocation(FVector(200.f,0.f,0.f));
-	TurnText->SetRelativeRotation(FRotator(90.f,0.f,0.f));
+	TurnText->SetRelativeLocation(FVector(200.f, 0.f, 0.f));
+	TurnText->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
 	TurnText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(0)));
 	TurnText->SetupAttachment(DummyRoot);
 
@@ -28,24 +28,22 @@ AOthelloBlockGrid::AOthelloBlockGrid()
 
 void AOthelloBlockGrid::BeginPlay()
 {
-	Super::BeginPlay();
-
 	// Number of blocks
 	const int32 NumBlocks = Size * Size;
 
 	BlockArray.SetNum(NumBlocks);
 
 	// Loop to spawn each block
-	for(int32 BlockIndex=0; BlockIndex<NumBlocks; BlockIndex++)
+	for (int32 BlockIndex = 0; BlockIndex<NumBlocks; BlockIndex++)
 	{
-		const float XOffset = (BlockIndex/Size) * BlockSpacing; // Divide by dimension
+		const float XOffset = (BlockIndex / Size) * BlockSpacing; // Divide by dimension
 		const float YOffset = (BlockIndex%Size) * BlockSpacing; // Modulo gives remainder
 
-		// Make position vector, offset from Grid location
+																// Make position vector, offset from Grid location
 		const FVector BlockLocation = FVector(XOffset, YOffset, 0.f) + GetActorLocation();
 
 		// Spawn a block
-		AOthelloBlock* NewBlock = GetWorld()->SpawnActor<AOthelloBlock>(BlockLocation, FRotator(0,0,0));
+		AOthelloBlock* NewBlock = GetWorld()->SpawnActor<AOthelloBlock>(BlockLocation, FRotator(0, 0, 0));
 
 		// Tell the block about its owner
 		if (NewBlock != nullptr)
@@ -58,10 +56,12 @@ void AOthelloBlockGrid::BeginPlay()
 
 		// Put stones on board depending on the rule for othello
 		if (BlockIndex / Size == 3 && BlockIndex % Size == 3 || BlockIndex / Size == 4 && BlockIndex % Size == 4)
-			NewBlock->PutStone(EStoneColor::White);
+			NewBlock->PutStoneF(EStoneColor::White);
 		else if (BlockIndex / Size == 3 && BlockIndex % Size == 4 || BlockIndex / Size == 4 && BlockIndex % Size == 3)
-			NewBlock->PutStone(EStoneColor::Black);
+			NewBlock->PutStoneF(EStoneColor::Black);
 	}
+
+	Super::BeginPlay();
 }
 
 bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
@@ -319,7 +319,7 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 	}
 
 	// East
-	for (int x = stone_x +1; x < Size; x++)
+	for (int x = stone_x + 1; x < Size; x++)
 	{
 		AOthelloBlock* Target = GetBlock(x, stone_y);
 

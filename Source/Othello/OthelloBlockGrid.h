@@ -13,13 +13,13 @@ class AOthelloBlockGrid : public AActor
 {
 	GENERATED_BODY()
 
-	/** Dummy root component */
-	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USceneComponent* DummyRoot;
+		/** Dummy root component */
+		UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		class USceneComponent* DummyRoot;
 
 	/** Text component for the score */
 	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UTextRenderComponent* TurnText;
+		class UTextRenderComponent* TurnText;
 
 public:
 	AOthelloBlockGrid();
@@ -28,12 +28,12 @@ public:
 	int32 Score;
 
 	/** Number of blocks along each side of grid */
-	UPROPERTY(Category=Grid, EditAnywhere, BlueprintReadOnly)
-	int32 Size;
+	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadOnly)
+		int32 Size;
 
 	/** Spacing of blocks */
-	UPROPERTY(Category=Grid, EditAnywhere, BlueprintReadOnly)
-	float BlockSpacing;
+	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadOnly)
+		float BlockSpacing;
 
 	/** Activated after 'AOthelloBlock::PutStone()' activates */
 	void AfterPutStone();
@@ -43,27 +43,29 @@ protected:
 	virtual void BeginPlay() override;
 	// End AActor interface
 
-	UPROPERTY()
-	TArray<AOthelloBlock*> BlockArray;
+	UPROPERTY(BlueprintReadOnly)
+		TArray<AOthelloBlock*> BlockArray;
 
 public:
 	/** Check stone can be put on (start_x, start_y)
-	 * @return true stone can be put on this position
-	 * @return false stone can't be put on this position
-	 */
-	bool CheckPossibility(uint8 start_x, uint8 start_y);
+	* @return true stone can be put on this position
+	* @return false stone can't be put on this position
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Check")
+		bool CheckPossibility(uint8 start_x, uint8 start_y);
 
 	/** Change color of stones which lie on 8-directions */
 	void ChangeStonesColor(uint8 stone_x, uint8 stone_y);
 
 	/** Check whether game is over or not
-	 * @return true game is over
-	 * @return false game is not over
-	 */
+	* @return true game is over
+	* @return false game is not over
+	*/
 	bool CheckGameOver();
 
 	/** Get block on (x, y) */
-	AOthelloBlock* GetBlock(uint8 x, uint8 y);
+	UFUNCTION(BlueprintCallable, Category = "Block")
+		AOthelloBlock* GetBlock(uint8 x, uint8 y);
 
 	/** Returns DummyRoot subobject **/
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }

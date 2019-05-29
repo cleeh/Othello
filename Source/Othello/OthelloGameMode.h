@@ -37,7 +37,7 @@ private:
 	uint16 GameTurnCount;
 
 	bool IsTurnOmitted;
-	
+
 public:
 	AOthelloGameMode();
 
@@ -57,8 +57,5 @@ public:
 	/** Returns 'IsTurnOmitted' */
 	FORCEINLINE bool GetTurnOmit() const { return IsTurnOmitted; }
 
-	
+
 };
-
-
-

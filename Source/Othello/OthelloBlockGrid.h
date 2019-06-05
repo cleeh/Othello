@@ -13,13 +13,13 @@ class AOthelloBlockGrid : public AActor
 {
 	GENERATED_BODY()
 
-		/** Dummy root component */
-		UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class USceneComponent* DummyRoot;
+	/** Dummy root component */
+	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* DummyRoot;
 
 	/** Text component for the score */
 	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class UTextRenderComponent* TurnText;
+	class UTextRenderComponent* TurnText;
 
 public:
 	AOthelloBlockGrid();
@@ -29,14 +29,22 @@ public:
 
 	/** Number of blocks along each side of grid */
 	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadOnly)
-		int32 Size;
+	int32 Size;
 
 	/** Spacing of blocks */
 	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadOnly)
-		float BlockSpacing;
+	float BlockSpacing;
 
 	/** Activated after 'AOthelloBlock::PutStone()' activates */
-	void AfterPutStone();
+	UFUNCTION(BlueprintImplementableEvent, Category = "Tensorflow")
+	void AfterPutStone_Black();
+
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void UpdatePutablePosition();
+
+	AOthelloBlock* GetBlockS(int index);
+
+	void Reset();
 
 protected:
 	// Begin AActor interface
@@ -44,7 +52,10 @@ protected:
 	// End AActor interface
 
 	UPROPERTY(BlueprintReadOnly)
-		TArray<AOthelloBlock*> BlockArray;
+	TArray<AOthelloBlock*> BlockArray;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<bool> IsPutable;
 
 public:
 	/** Check stone can be put on (start_x, start_y)
@@ -52,9 +63,10 @@ public:
 	* @return false stone can't be put on this position
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Check")
-		bool CheckPossibility(uint8 start_x, uint8 start_y);
+	bool CheckPossibility(int start_x, int start_y);
 
 	/** Change color of stones which lie on 8-directions */
+	UFUNCTION(BlueprintCallable, Category = "Game")
 	void ChangeStonesColor(uint8 stone_x, uint8 stone_y);
 
 	/** Check whether game is over or not
@@ -65,10 +77,20 @@ public:
 
 	/** Get block on (x, y) */
 	UFUNCTION(BlueprintCallable, Category = "Block")
-		AOthelloBlock* GetBlock(uint8 x, uint8 y);
+	AOthelloBlock* GetBlock(int x, int y);
 
 	/** Returns DummyRoot subobject **/
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 	/** Returns ScoreText subobject **/
 	FORCEINLINE class UTextRenderComponent* GetTurnText() const { return TurnText; }
+
+public:
+	UFUNCTION(BlueprintPure, Category = "Tensorflow")
+	int GetRoundNumber();
+
+	UFUNCTION(BlueprintPure, Category = "Tensorflow")
+	TArray<int> GetState();
+
+	UFUNCTION(BlueprintPure, Category = "Tensorflow")
+	bool IsGameOver();
 };

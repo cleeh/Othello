@@ -75,7 +75,6 @@ void AOthelloBlock::BlockClicked(UPrimitiveComponent* ClickedComp, FKey ButtonCl
 	HandleClicked();
 }
 
-
 void AOthelloBlock::OnFingerPressedBlock(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent)
 {
 	HandleClicked();
@@ -83,16 +82,12 @@ void AOthelloBlock::OnFingerPressedBlock(ETouchIndex::Type FingerIndex, UPrimiti
 
 void AOthelloBlock::HandleClicked()
 {
-	if (WhatStoneColor != EStoneColor::None); //ClearStone();
-	else
-	{
-		if (OwningGrid->CheckPossibility(X, Y))
-		{
-			PutStone();
-			OwningGrid->ChangeStonesColor(X, Y);
+	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 
-			OwningGrid->AfterPutStone();
-		}
+	if (PutStone())
+	{
+		OwningGrid->ChangeStonesColor(X, Y);
+		OwningGrid->AfterPutStone_Black();
 	}
 }
 
@@ -114,30 +109,44 @@ void AOthelloBlock::Highlight(bool bOn)
 	}
 }
 
-void AOthelloBlock::PutStone()
+bool AOthelloBlock::PutStone()
 {
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 
-	if (GameMode)
+	if (GameMode && WhatStoneColor == EStoneColor::None && X >= 0 && Y >= 0)
 	{
-		switch (GameMode->GetTurn())
+		if (OwningGrid->CheckPossibility(X, Y))
 		{
-		case ETurn::Black:
-			StoneMesh->SetMaterial(0, BlackMaterial);
-			WhatStoneColor = EStoneColor::Black;
-			break;
-		case ETurn::White:
-			StoneMesh->SetMaterial(0, WhiteMaterial);
-			WhatStoneColor = EStoneColor::White;
-			break;
+			switch (GameMode->GetTurn())
+			{
+			case ETurn::Black:
+				StoneMesh->SetMaterial(0, BlackMaterial);
+				WhatStoneColor = EStoneColor::Black;
+				break;
+			case ETurn::White:
+				StoneMesh->SetMaterial(0, WhiteMaterial);
+				WhatStoneColor = EStoneColor::White;
+				break;
+			}
+
+			StoneMesh->SetVisibility(true);
+			GameMode->NextTurn();
+
+			if (OwningGrid->CheckGameOver())
+			{
+				Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode())->GameOver();
+				OwningGrid->Reset();
+			}
+
+			return true;
 		}
-		UE_LOG(LogTemp, Warning, TEXT("%d"), GameMode->NextTurn());
-		StoneMesh->SetVisibility(true);
+		else
+			UE_LOG(LogTemp, Warning, TEXT("Stone should not be put on this block because of game rule"));
 	}
 	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("There is no Gamemode"));
-	}
+		UE_LOG(LogTemp, Warning, TEXT("This block already has stone or wrong argument"));
+	
+	return false;
 }
 
 void AOthelloBlock::PutStoneF(EStoneColor stone)

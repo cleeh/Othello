@@ -34,7 +34,7 @@ private:
 	ETurn GameTurn;
 
 	/** This increases whenever turn is changed */
-	uint16 GameTurnCount;
+	int GameTurnCount;
 
 	bool IsTurnOmitted;
 
@@ -42,13 +42,18 @@ public:
 	AOthelloGameMode();
 
 	/** Omit turn */
-	uint16 OmitTurn();
+	UFUNCTION(BlueprintCallable, Category="Mode")
+	int OmitTurn();
 
 	/** Turn over & change turn to opponent player */
-	uint16 NextTurn();
+	int NextTurn();
 
 	/** Declare game over & update game status */
 	void GameOver();
+
+	bool IsGameOver();
+
+	void Reset();
 
 	/** Returns 'GameTurn' */
 	FORCEINLINE ETurn GetTurn() const { return GameTurn; }
@@ -56,6 +61,6 @@ public:
 	FORCEINLINE uint16 GetTurnCount() const { return GameTurnCount; }
 	/** Returns 'IsTurnOmitted' */
 	FORCEINLINE bool GetTurnOmit() const { return IsTurnOmitted; }
-
-
+	/** Returns 'GameStatus' */
+	FORCEINLINE EGameStatus GetGameStatus() const{ return GameStatus; }
 };

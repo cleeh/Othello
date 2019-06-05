@@ -32,14 +32,15 @@ void AOthelloBlockGrid::BeginPlay()
 	const int32 NumBlocks = Size * Size;
 
 	BlockArray.SetNum(NumBlocks);
+	IsPutable.SetNum(NumBlocks);
 
 	// Loop to spawn each block
 	for (int32 BlockIndex = 0; BlockIndex<NumBlocks; BlockIndex++)
 	{
-		const float XOffset = (BlockIndex / Size) * BlockSpacing; // Divide by dimension
-		const float YOffset = (BlockIndex%Size) * BlockSpacing; // Modulo gives remainder
+		const float XOffset = (BlockIndex % Size) * BlockSpacing;
+		const float YOffset = (BlockIndex / Size) * BlockSpacing;
 
-																// Make position vector, offset from Grid location
+		// Make position vector, offset from Grid location
 		const FVector BlockLocation = FVector(XOffset, YOffset, 0.f) + GetActorLocation();
 
 		// Spawn a block
@@ -49,8 +50,8 @@ void AOthelloBlockGrid::BeginPlay()
 		if (NewBlock != nullptr)
 		{
 			NewBlock->OwningGrid = this;
-			NewBlock->X = BlockIndex / Size;
-			NewBlock->Y = BlockIndex % Size;
+			NewBlock->X = BlockIndex % Size;
+			NewBlock->Y = BlockIndex / Size;
 			BlockArray[BlockIndex] = NewBlock;
 		}
 
@@ -61,11 +62,15 @@ void AOthelloBlockGrid::BeginPlay()
 			NewBlock->PutStoneF(EStoneColor::Black);
 	}
 
+	UpdatePutablePosition();
+
 	Super::BeginPlay();
 }
 
-bool AOthelloBlockGrid::CheckPossibility(uint8 start_x, uint8 start_y)
+bool AOthelloBlockGrid::CheckPossibility(int start_x, int start_y)
 {
+	if (start_x < 0 || start_y < 0) return false;
+
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 	EStoneColor target_color;
 	EStoneColor other_color;
@@ -552,12 +557,6 @@ bool AOthelloBlockGrid::CheckGameOver()
 {
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 
-	// Check whether board is full of stones
-	if (GameMode->GetTurnCount() > Size * Size - 4)
-	{
-		return true;
-	}
-
 	// Check whether colors of all stone are same each other
 	if (GameMode->GetTurnCount() <= Size * Size - 4)
 	{
@@ -606,22 +605,78 @@ bool AOthelloBlockGrid::CheckGameOver()
 		}
 	}
 
-	return false;
+	// Check whether board is full of stones
+	for (int i = 0; i < Size * Size; i++)
+		if(GetBlock(i%Size, i/Size)->GetStoneColor() == EStoneColor::None)
+			return false;
+
+	return true;
 }
 
-AOthelloBlock* AOthelloBlockGrid::GetBlock(uint8 x, uint8 y)
+AOthelloBlock* AOthelloBlockGrid::GetBlockS(int index)
 {
-	const int target = x * Size + y;
+	return BlockArray[index];
+}
+
+void AOthelloBlockGrid::Reset()
+{
+	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
+	GameMode->Reset();
+
+	for (int i = 0; i < Size * Size; i++)
+	{
+		AOthelloBlock* Block = GetBlockS(i);
+
+		Block->ClearStone();
+		if (i == 27 || i == 36) Block->PutStoneF(EStoneColor::Black);
+		else if (i == 28 || i == 35) Block->PutStoneF(EStoneColor::White);
+	}
+
+	UpdatePutablePosition();
+}
+
+AOthelloBlock* AOthelloBlockGrid::GetBlock(int x, int y)
+{
+	if (x < 0 || y < 0) return nullptr;
+
+	const int target = y * Size + x;
 	if (target < BlockArray.Num() && target >= 0)
 		return BlockArray[target];
 
 	return nullptr;
 }
 
-void AOthelloBlockGrid::AfterPutStone()
+int AOthelloBlockGrid::GetRoundNumber()
 {
-	if (CheckGameOver())
-		Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode())->GameOver();
+	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
+
+	return (int)GameMode->GetTurnCount() / 2;
+}
+
+TArray<int> AOthelloBlockGrid::GetState()
+{
+	TArray<int> StateArray;
+
+	for(int y = 0; y < Size; y++)
+		for (int x = 0; x < Size; x++)
+		{
+			StateArray.Add((int)GetBlock(x, y)->GetStoneColor());
+		}
+
+	return StateArray;
+}
+
+bool AOthelloBlockGrid::IsGameOver()
+{
+	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
+
+	return GameMode->IsGameOver();
+}
+
+void AOthelloBlockGrid::UpdatePutablePosition()
+{
+	for (int i = 0; i < Size * Size; i++)
+		IsPutable[i] = CheckPossibility(i % Size, i / Size);
 }
 
 #undef LOCTEXT_NAMESPACE

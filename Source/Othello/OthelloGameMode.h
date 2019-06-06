@@ -49,6 +49,7 @@ public:
 	int NextTurn();
 
 	/** Declare game over & update game status */
+	UFUNCTION(BlueprintCallable, Category="Game")
 	void GameOver();
 
 	bool IsGameOver();

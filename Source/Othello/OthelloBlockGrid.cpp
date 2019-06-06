@@ -281,7 +281,7 @@ bool AOthelloBlockGrid::CheckPossibility(int start_x, int start_y)
 	return false;
 }
 
-void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
+int AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 {
 	EStoneColor target_color = GetBlock(stone_x, stone_y)->GetStoneColor();
 	EStoneColor other_color;
@@ -548,9 +548,16 @@ void AOthelloBlockGrid::ChangeStonesColor(uint8 stone_x, uint8 stone_y)
 		}
 	}
 
+	int ChangedStoneNumber = 0;
 	for (int y = 0; y < Size; y++)
 		for (int x = 0; x < Size; x++)
-			if (StoneToChange[y*Size + x]) GetBlock(x, y)->ChangeStone();
+			if (StoneToChange[y*Size + x])
+			{
+				GetBlock(x, y)->ChangeStone();
+				ChangedStoneNumber++;
+			}
+
+	return ChangedStoneNumber;
 }
 
 bool AOthelloBlockGrid::CheckGameOver()
@@ -606,8 +613,9 @@ bool AOthelloBlockGrid::CheckGameOver()
 	}
 
 	// Check whether board is full of stones
+	UpdatePutablePosition();
 	for (int i = 0; i < Size * Size; i++)
-		if(GetBlock(i%Size, i/Size)->GetStoneColor() == EStoneColor::None)
+		if (IsPutable[i])
 			return false;
 
 	return true;
@@ -618,8 +626,18 @@ AOthelloBlock* AOthelloBlockGrid::GetBlockS(int index)
 	return BlockArray[index];
 }
 
-void AOthelloBlockGrid::Reset()
+EStoneColor AOthelloBlockGrid::ResetGrid()
 {
+	int WhiteStoneNumber = 0;
+	int BlackStoneNumber = 0;
+	for (int i = 0; i < Size * Size; i++)
+	{
+		if (GetBlockS(i)->GetStoneColor() == EStoneColor::White)
+			WhiteStoneNumber++;
+		else if (GetBlockS(i)->GetStoneColor() == EStoneColor::Black)
+			BlackStoneNumber++;
+	}
+
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 	GameMode->Reset();
 
@@ -633,6 +651,13 @@ void AOthelloBlockGrid::Reset()
 	}
 
 	UpdatePutablePosition();
+
+	if (WhiteStoneNumber > BlackStoneNumber)
+		return EStoneColor::White;
+	else if (WhiteStoneNumber < BlackStoneNumber)
+		return EStoneColor::Black;
+	else
+		return EStoneColor::None;
 }
 
 AOthelloBlock* AOthelloBlockGrid::GetBlock(int x, int y)
@@ -678,5 +703,4 @@ void AOthelloBlockGrid::UpdatePutablePosition()
 	for (int i = 0; i < Size * Size; i++)
 		IsPutable[i] = CheckPossibility(i % Size, i / Size);
 }
-
 #undef LOCTEXT_NAMESPACE

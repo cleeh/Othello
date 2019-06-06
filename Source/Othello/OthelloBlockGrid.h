@@ -44,7 +44,8 @@ public:
 
 	AOthelloBlock* GetBlockS(int index);
 
-	void Reset();
+	UFUNCTION(BlueprintCallable, Category="Game")
+	EStoneColor ResetGrid();
 
 protected:
 	// Begin AActor interface
@@ -67,13 +68,17 @@ public:
 
 	/** Change color of stones which lie on 8-directions */
 	UFUNCTION(BlueprintCallable, Category = "Game")
-	void ChangeStonesColor(uint8 stone_x, uint8 stone_y);
+	int ChangeStonesColor(uint8 stone_x, uint8 stone_y);
 
 	/** Check whether game is over or not
 	* @return true game is over
 	* @return false game is not over
 	*/
+	UFUNCTION(BlueprintCallable, Category="Game")
 	bool CheckGameOver();
+
+	UPROPERTY(BlueprintReadOnly)
+	int Reward = 0;
 
 	/** Get block on (x, y) */
 	UFUNCTION(BlueprintCallable, Category = "Block")

@@ -82,12 +82,18 @@ void AOthelloBlock::OnFingerPressedBlock(ETouchIndex::Type FingerIndex, UPrimiti
 
 void AOthelloBlock::HandleClicked()
 {
-	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
-
 	if (PutStone())
 	{
-		OwningGrid->ChangeStonesColor(X, Y);
+		AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
+
+		OwningGrid->Reward = OwningGrid->ChangeStonesColor(X, Y);
 		OwningGrid->AfterPutStone_Black();
+
+		if (OwningGrid->CheckGameOver())
+		{
+			Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode())->GameOver();
+			OwningGrid->ResetGrid();
+		}
 	}
 }
 
@@ -131,12 +137,6 @@ bool AOthelloBlock::PutStone()
 
 			StoneMesh->SetVisibility(true);
 			GameMode->NextTurn();
-
-			if (OwningGrid->CheckGameOver())
-			{
-				Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode())->GameOver();
-				OwningGrid->Reset();
-			}
 
 			return true;
 		}

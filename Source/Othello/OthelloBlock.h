@@ -10,8 +10,8 @@ UENUM(BlueprintType)
 enum class EStoneColor : uint8
 {
 	None = 0,
-	Black = 1,
-	White = 2
+	Black = 80,
+	White = 160
 };
 
 /** A block that can be clicked */
@@ -39,7 +39,11 @@ private:
 public:
 	AOthelloBlock();
 
-	int X, Y;
+	UPROPERTY(BlueprintReadOnly, Category = "Grid")
+	int X;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Grid")
+	int Y;
 
 	/** Are we currently active? */
 	bool bIsActive;

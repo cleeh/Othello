@@ -1,3 +1,4 @@
+import gc
 import random
 import math
 
@@ -9,8 +10,8 @@ from TFPluginAPI import TFPluginAPI
 #==================== Constants ====================#
 # about Game
 NONE = 0
-BLACK = 1
-WHITE = 2
+BLACK = 80
+WHITE = 160
 
 # about Hypothesis
 GRIDS = 8
@@ -20,7 +21,7 @@ HIDDEN2S = INPUTS
 OUTPUTS = GRIDS * GRIDS
 
 # about Learning
-LEARNINGRATE = 0.05
+LEARNINGRATE = 0.02
 DISCOUNT = 0.9
 EPSILONMINVALUE = 0.001
 
@@ -60,11 +61,8 @@ class ReplayMemory:
 
 		Length = self.Count
 		for i in range(BatchSize):
-			if Length == 1:
-				Length = 2
-
 			# Choose a random memory experience
-			RandomIndex = random.randrange(1, Length)
+			RandomIndex = random.randrange(0, Length)
 
 			CurrentState = np.reshape(self.CurrentState[RandomIndex], (1, INPUTS))
 			Target = sess.run(model, feed_dict={input_placeholder: CurrentState})
@@ -113,13 +111,23 @@ class ExampleAPI(TFPluginAPI):
 
 		#==================== Final Process ====================#
 		# Cost & Optimizer
-		self.cost = tf.reduce_mean(tf.square(self.output - self.target), 1)
-		self.optimizer = tf.train.GradientDescentOptimizer(LEARNINGRATE).minimize(self.cost)
+		self.cost = tf.reduce_mean(tf.square(self.output - self.target), 1, name='cost')
+		self.optimizer = tf.train.GradientDescentOptimizer(LEARNINGRATE, name='optimizer').minimize(self.cost, name='minimizer')
+
+		# File Path
+		self.scripts_path = ue.get_content_dir() + "Scripts"
+		self.model_directory = self.scripts_path + "/model"
+		self.model_path = self.model_directory + "/model.ckpt"		
 
 		# Session & Saver
 		self.sess = tf.Session()
 		self.saver = tf.train.Saver()
-		self.sess.run(tf.global_variables_initializer())
+		try:
+			self.saver.restore(self.sess, tf.train.latest_checkpoint(self.model_directory))
+			ue.log('loaded model')
+		except:
+			self.sess.run(tf.global_variables_initializer())
+			ue.log('no stored model')
 
 		# ReplayMemory
 		self.Memory = ReplayMemory()
@@ -127,7 +135,7 @@ class ExampleAPI(TFPluginAPI):
 		# Epsilon
 		self.Epsilon = 1
 
-		self.CalculationNumber = 1
+		self.Sequence = 1
 		pass
 
 	def onJsonInput(self, jsonInput):
@@ -145,12 +153,12 @@ class ExampleAPI(TFPluginAPI):
 		action = 0
 		selector = random.random()
 
-		ue.log(self.CalculationNumber)
-		self.CalculationNumber += 1
-		ue.log('================================== Action, Q ==================================')
+		ue.log(self.Sequence)
+		self.Sequence += 1
 		if (selector <= self.Epsilon):
-			ue.log(list)
-			index = random.randrange(0, len(PutableList) - 1)
+			index = random.randrange(0, len(PutableList))
+			if(index > 0):
+				index -= 1
 			action = PutableList[index]
 			ue.log('#=== Random ===#')
 			ue.log(action)
@@ -159,12 +167,14 @@ class ExampleAPI(TFPluginAPI):
 			action = q.argmax()
 			ue.log('#=== DQN ===#')
 			ue.log(action)
-			ue.log(q)
 			for i in range(len(PutableList)):
 				if(action == PutableList[i]):
+					Reward -= 0.5
 					break
+			ue.log('#=== -> (Random) ===#')
 			index = random.randrange(0, len(PutableList) - 1)
 			action = PutableList[index]
+			ue.log(action)
 
 		# Decay the epsilon by multiplying by 0.999, not allowing it to go below a certain threshold.
 		if(self.Epsilon > EPSILONMINVALUE):
@@ -181,6 +191,9 @@ class ExampleAPI(TFPluginAPI):
 		ue.log('============================================================================')
 		
 		self.State = NewState
+		if(self.Sequence % 100 == 0):
+			save_path = self.saver.save(self.sess, self.model_path)#, global_step=training_range)
+			ue.log("save_path")
 		return int(action)
 	def onBeginTraining(self):
 		pass

@@ -9,9 +9,9 @@
 UENUM(BlueprintType)
 enum class EStoneColor : uint8
 {
-	None = 0,
-	Black = 127,
-	White = 254
+	None = 1,
+	Black = 2,
+	White = 3
 };
 
 /** A block that can be clicked */

@@ -9,9 +9,9 @@ from TFPluginAPI import TFPluginAPI
 
 #==================== Constants ====================#
 # about Game
-NONE = 0
-BLACK = 127
-WHITE = 254
+NONE = 1
+BLACK = 2
+WHITE = 3
 
 # about Hypothesis
 GRIDS = 8
@@ -22,7 +22,7 @@ OUTPUTS = GRIDS * GRIDS
 
 # about Learning
 LEARNINGRATE = 0.01
-DISCOUNT = 0.9
+DISCOUNT = 0.1
 EPSILONMINVALUE = 0.001
 
 # about ReplayMemory
@@ -122,6 +122,7 @@ class ExampleAPI(TFPluginAPI):
 
 		# ReplayMemory
 		self.Memory = ReplayMemory()
+		self.LastAction = -1
 
 		# Epsilon
 		self.Epsilon = 1
@@ -138,41 +139,45 @@ class ExampleAPI(TFPluginAPI):
 		IsGameOver = jsonInput["gameover"]
 		Putable = jsonInput["putable"]
 
-		PutableList = []
-		for i in range(INPUTS):
-			if(Putable[i]):
-				PutableList.append(i)
-		if(len(PutableList) <= 0):
-			return -1
-
-		self.Sequence += 1
-		ue.log('==================================== ' + str(self.Sequence) + ' ====================================')
-		
 		action = -1
-		selector = random.random()
-		if (selector <= self.Epsilon):
-			index = random.randrange(0, len(PutableList))
-			if(index > 0):
-				index -= 1
-			action = PutableList[index]
-			ue.log('#Random: ' + str(action))
-			ue.log(action)
+		if(IsGameOver):
+			action = self.LastAction
 		else:
-			q = self.sess.run(self.output, feed_dict={self.input: NewState})
-			action = q.argmax()
-			ue.log('#DQN: ' + str(action))
-			for i in range(len(PutableList)):
-				if(action == PutableList[i]):
-					break
-			index = random.randrange(0, len(PutableList))
-			action = PutableList[index]
-			ue.log('-> Random: (' + str(action) + ')')
+			PutableList = []
+			for i in range(INPUTS):
+				if(Putable[i]):
+					PutableList.append(i)
+			if(len(PutableList) <= 0):
+				return -1
 
-		# Decay the epsilon by multiplying by 0.999, not allowing it to go below a certain threshold.
-		if(self.Epsilon > EPSILONMINVALUE):
-			self.Epsilon *= 0.999
+			self.Sequence += 1
+			ue.log('==================================== ' + str(self.Sequence) + ' ====================================')
+
+			selector = random.random()
+			if (selector <= self.Epsilon):
+				index = random.randrange(0, len(PutableList))
+				if(index > 0):
+					index -= 1
+				action = PutableList[index]
+				ue.log('#Random: ' + str(action))
+				ue.log(action)
+			else:
+				q = self.sess.run(self.output, feed_dict={self.input: NewState})
+				action = q.argmax()
+				ue.log('#DQN: ' + str(action))
+				for i in range(len(PutableList)):
+					if(action == PutableList[i]):
+						break
+				index = random.randrange(0, len(PutableList))
+				action = PutableList[index]
+				ue.log('-> Random: (' + str(action) + ')')
+
+			# Decay the epsilon by multiplying by 0.999, not allowing it to go below a certain threshold.
+			if(self.Epsilon > EPSILONMINVALUE):
+				self.Epsilon *= 0.9999
 
 		self.Memory.save(self.State, NewState, action, Reward, IsGameOver)
+		self.LastAction = action
 		self.State = NewState
 
 		return int(action)
@@ -182,14 +187,14 @@ class ExampleAPI(TFPluginAPI):
 		Inputs, Targets = self.Memory.getBatch(self.sess, self.output, self.input)
 
 		_, loss = self.sess.run([self.optimizer, self.cost], feed_dict={self.input: Inputs, self.target: Targets})
-		ue.log('==================================== Targets ====================================')
+		ue.log('==================================== Targets, loss ====================================')
 		ue.log(Targets)
-		#ue.log(loss)
+		ue.log(loss)
 		ue.log('============================================================================')
 
 		if(self.Sequence % 100 == 0):
 			save_path = self.saver.save(self.sess, self.model_path)#, global_step=training_range)
-			ue.log("save_path")
+			ue.log("saved model")
 
 		self.reset()
 		self.Memory.reset()
@@ -208,7 +213,6 @@ class ExampleAPI(TFPluginAPI):
 		self.State[0][28] = WHITE
 		self.State[0][35] = WHITE
 		pass
-
 
 def getApi():
 	#return CLASSNAME.getInstance()

@@ -621,12 +621,7 @@ bool AOthelloBlockGrid::CheckGameOver()
 	return true;
 }
 
-AOthelloBlock* AOthelloBlockGrid::GetBlockS(int index)
-{
-	return BlockArray[index];
-}
-
-EStoneColor AOthelloBlockGrid::ResetGrid()
+EStoneColor AOthelloBlockGrid::WhatColorIsMore()
 {
 	int WhiteStoneNumber = 0;
 	int BlackStoneNumber = 0;
@@ -638,6 +633,21 @@ EStoneColor AOthelloBlockGrid::ResetGrid()
 			BlackStoneNumber++;
 	}
 
+	if (WhiteStoneNumber > BlackStoneNumber)
+		return EStoneColor::White;
+	else if (WhiteStoneNumber < BlackStoneNumber)
+		return EStoneColor::Black;
+	else
+		return EStoneColor::None;
+}
+
+AOthelloBlock* AOthelloBlockGrid::GetBlockS(int index)
+{
+	return BlockArray[index];
+}
+
+void AOthelloBlockGrid::ResetGrid()
+{
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 	GameMode->Reset();
 
@@ -651,13 +661,6 @@ EStoneColor AOthelloBlockGrid::ResetGrid()
 	}
 
 	UpdatePutablePosition();
-
-	if (WhiteStoneNumber > BlackStoneNumber)
-		return EStoneColor::White;
-	else if (WhiteStoneNumber < BlackStoneNumber)
-		return EStoneColor::Black;
-	else
-		return EStoneColor::None;
 }
 
 AOthelloBlock* AOthelloBlockGrid::GetBlock(int x, int y)

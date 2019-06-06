@@ -44,8 +44,11 @@ public:
 
 	AOthelloBlock* GetBlockS(int index);
 
-	UFUNCTION(BlueprintCallable, Category="Game")
-	EStoneColor ResetGrid();
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void ResetGrid();
+
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	EStoneColor WhatColorIsMore();
 
 protected:
 	// Begin AActor interface

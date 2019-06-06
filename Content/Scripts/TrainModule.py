@@ -10,29 +10,31 @@ from TFPluginAPI import TFPluginAPI
 #==================== Constants ====================#
 # about Game
 NONE = 0
-BLACK = 80
-WHITE = 160
+BLACK = 127
+WHITE = 254
 
 # about Hypothesis
 GRIDS = 8
 INPUTS = GRIDS * GRIDS
-HIDDEN1S = INPUTS
-HIDDEN2S = INPUTS
+HIDDEN1S = 120
+HIDDEN2S = 120
 OUTPUTS = GRIDS * GRIDS
 
 # about Learning
-LEARNINGRATE = 0.02
+LEARNINGRATE = 0.01
 DISCOUNT = 0.9
 EPSILONMINVALUE = 0.001
 
 # about ReplayMemory
-MAXMEMORY = 500
-MAXBATCHSIZE = 50
+MAXMEMORY = 64
 #=================================================#
-test = [[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,]]
 
 class ReplayMemory:
 	def __init__(self):
+		self.reset()
+		pass
+
+	def reset(self):
 		self.CurrentState = np.empty((MAXMEMORY, INPUTS), dtype = np.float32)
 		self.NextState = np.empty((MAXMEMORY, INPUTS), dtype = np.float32)
 		self.Actions = np.zeros(MAXMEMORY, dtype = np.uint8)
@@ -40,57 +42,46 @@ class ReplayMemory:
 		self.IsGameOver = np.empty(MAXMEMORY, dtype = np.bool)
 
 		self.Count = 0
-		self.Pointer = 0
 		pass
 
 	def save(self, current_state, next_state, action, reward, game_over):
-		self.CurrentState[self.Pointer, ...] = current_state
-		self.NextState[self.Pointer, ...] = next_state
-		self.Actions[self.Pointer] = action
-		self.Rewards[self.Pointer] = reward
-		self.IsGameOver[self.Pointer] = game_over
+		self.CurrentState[self.Count, ...] = current_state
+		self.NextState[self.Count, ...] = next_state
+		self.Actions[self.Count] = action
+		self.Rewards[self.Count] = reward
+		self.IsGameOver[self.Count] = game_over
 
-		self.Count = max(self.Count, self.Pointer + 1)
-		self.Pointer = (self.Pointer + 1) % MAXMEMORY
+		self.Count += 1
 		pass
 
 	def getBatch(self, sess, model, input_placeholder):
-		BatchSize = min(self.Count, MAXBATCHSIZE)
-		Inputs = np.zeros((BatchSize, INPUTS))
-		Targets = np.zeros((BatchSize, OUTPUTS))
+		Inputs = np.zeros((self.Count, INPUTS))
+		Targets = np.zeros((self.Count, OUTPUTS))
 
-		Length = self.Count
-		for i in range(BatchSize):
-			# Choose a random memory experience
-			RandomIndex = random.randrange(0, Length)
-
-			CurrentState = np.reshape(self.CurrentState[RandomIndex], (1, INPUTS))
+		for i in range(self.Count):
+			CurrentState = np.reshape(self.CurrentState[i], (1, INPUTS))
 			Target = sess.run(model, feed_dict={input_placeholder: CurrentState})
 
-			NextState = np.reshape(self.NextState[RandomIndex], (1, INPUTS))
+			NextState = np.reshape(self.NextState[i], (1, INPUTS))
 			Output = sess.run(model, feed_dict={input_placeholder: NextState})
 
 			# Gives max Q-value for the next state
-			NextStateMaxQ = np.amax(Output)
-			if(self.IsGameOver[RandomIndex] == True):
-				Target[0, [self.Actions[RandomIndex] - 1]] = self.Rewards[RandomIndex]
+			if(self.IsGameOver[i] == True):
+				Target[0, [self.Actions[i]]] = self.Rewards[i]
 			else:
-				Target[0, [self.Actions[RandomIndex] - 1]] = self.Rewards[RandomIndex] + DISCOUNT * NextStateMaxQ
+				Target[0, [self.Actions[i]]] = self.Rewards[i] + DISCOUNT * np.amax(Output)
 
 			# Update 'Inputs' & 'Targets'
 			Inputs[i] = CurrentState
 			Targets[i] = Target
+
 		return Inputs, Targets
 
 class ExampleAPI(TFPluginAPI):
 	def onSetup(self):
 		#==================== Initialize ====================#
 		# State
-		self.State = np.zeros((1, INPUTS))
-		self.State[0][27] = BLACK
-		self.State[0][36] = BLACK
-		self.State[0][28] = WHITE
-		self.State[0][35] = WHITE
+		self.reset()
 
 		#==================== Hypothesis ====================#
 		self.input = tf.placeholder(tf.float32, shape=[None, INPUTS], name='input')
@@ -135,7 +126,9 @@ class ExampleAPI(TFPluginAPI):
 		# Epsilon
 		self.Epsilon = 1
 
-		self.Sequence = 1
+		# Game
+		self.Sequence = 0
+		self.PlayNumber = 1
 		pass
 
 	def onJsonInput(self, jsonInput):
@@ -149,57 +142,73 @@ class ExampleAPI(TFPluginAPI):
 		for i in range(INPUTS):
 			if(Putable[i]):
 				PutableList.append(i)
+		if(len(PutableList) <= 0):
+			return -1
 
-		action = 0
-		selector = random.random()
-
-		ue.log(self.Sequence)
 		self.Sequence += 1
+		ue.log('==================================== ' + str(self.Sequence) + ' ====================================')
+		
+		action = -1
+		selector = random.random()
 		if (selector <= self.Epsilon):
 			index = random.randrange(0, len(PutableList))
 			if(index > 0):
 				index -= 1
 			action = PutableList[index]
-			ue.log('#=== Random ===#')
+			ue.log('#Random: ' + str(action))
 			ue.log(action)
 		else:
 			q = self.sess.run(self.output, feed_dict={self.input: NewState})
 			action = q.argmax()
-			ue.log('#=== DQN ===#')
-			ue.log(action)
+			ue.log('#DQN: ' + str(action))
 			for i in range(len(PutableList)):
 				if(action == PutableList[i]):
-					Reward -= 0.5
 					break
-			ue.log('#=== -> (Random) ===#')
-			index = random.randrange(0, len(PutableList) - 1)
+			index = random.randrange(0, len(PutableList))
 			action = PutableList[index]
-			ue.log(action)
+			ue.log('-> Random: (' + str(action) + ')')
 
 		# Decay the epsilon by multiplying by 0.999, not allowing it to go below a certain threshold.
 		if(self.Epsilon > EPSILONMINVALUE):
-			self.Epsilon *= 0.9999
+			self.Epsilon *= 0.999
 
 		self.Memory.save(self.State, NewState, action, Reward, IsGameOver)
+		self.State = NewState
 
+		return int(action)
+
+	def onBeginTraining(self):
 		# We get a batch of training data to train the model.
 		Inputs, Targets = self.Memory.getBatch(self.sess, self.output, self.input)
 
 		_, loss = self.sess.run([self.optimizer, self.cost], feed_dict={self.input: Inputs, self.target: Targets})
-		ue.log('==================================== loss ====================================')
-		ue.log(loss)
+		ue.log('==================================== Targets ====================================')
+		ue.log(Targets)
+		#ue.log(loss)
 		ue.log('============================================================================')
-		
-		self.State = NewState
+
 		if(self.Sequence % 100 == 0):
 			save_path = self.saver.save(self.sess, self.model_path)#, global_step=training_range)
 			ue.log("save_path")
-		return int(action)
-	def onBeginTraining(self):
-		pass
+
+		self.reset()
+		self.Memory.reset()
+		self.PlayNumber += 1
+		ue.log('#PlayNumber: ' + str(self.PlayNumber))
+
+		return {}
 
 	def onStopTraining(self):
 		pass
+
+	def reset(self):
+		self.State = np.zeros((1, INPUTS))
+		self.State[0][27] = BLACK
+		self.State[0][36] = BLACK
+		self.State[0][28] = WHITE
+		self.State[0][35] = WHITE
+		pass
+
 
 def getApi():
 	#return CLASSNAME.getInstance()

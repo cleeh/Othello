@@ -97,7 +97,7 @@ public:
 	int GetRoundNumber();
 
 	UFUNCTION(BlueprintPure, Category = "Tensorflow")
-	TArray<int> GetState();
+	TArray<float> GetState();
 
 	UFUNCTION(BlueprintPure, Category = "Tensorflow")
 	bool IsGameOver();

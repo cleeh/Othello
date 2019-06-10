@@ -564,59 +564,65 @@ bool AOthelloBlockGrid::CheckGameOver()
 {
 	AOthelloGameMode* GameMode = Cast<AOthelloGameMode>(GetWorld()->GetAuthGameMode());
 
-	// Check whether colors of all stone are same each other
-	if (GameMode->GetTurnCount() <= Size * Size - 4)
-	{
-		uint16 WhiteStoneCount = 0;
-		uint16 BlackStoneCount = 0;
+	//// Check whether colors of all stone are same each other
+	//if (GameMode->GetTurnCount() <= Size * Size - 4)
+	//{
+	//	uint16 WhiteStoneCount = 0;
+	//	uint16 BlackStoneCount = 0;
 
-		for (int y = 0; y < Size; y++)
-		{
-			for (int x = 0; x < Size; x++)
-			{
-				AOthelloBlock* Target = GetBlock(x, y);
+	//	for (int y = 0; y < Size; y++)
+	//	{
+	//		for (int x = 0; x < Size; x++)
+	//		{
+	//			AOthelloBlock* Target = GetBlock(x, y);
 
-				if (Target->GetStoneColor() == EStoneColor::White) WhiteStoneCount++;
-				else if (Target->GetStoneColor() == EStoneColor::Black) BlackStoneCount++;
-			}
-		}
-		if ((WhiteStoneCount == 0 && BlackStoneCount > 0) || (WhiteStoneCount > 0 && BlackStoneCount == 0))
-		{
-			return true;
-		}
-	}
+	//			if (Target->GetStoneColor() == EStoneColor::White) WhiteStoneCount++;
+	//			else if (Target->GetStoneColor() == EStoneColor::Black) BlackStoneCount++;
+	//		}
+	//	}
+	//	if ((WhiteStoneCount == 0 && BlackStoneCount > 0) || (WhiteStoneCount > 0 && BlackStoneCount == 0))
+	//	{
+	//		return true;
+	//	}
+	//}
 
-	// Check whether there is no location stones can be put on
-	for (int y = 0, count = 0; y < Size; y++)
-	{
-		for (int x = 0; x < Size; x++)
-		{
-			bool IsPossible = CheckPossibility(x, y);
+	//// Check whether there is no location stones can be put on
+	//for (int y = 0, count = 0; y < Size; y++)
+	//{
+	//	for (int x = 0; x < Size; x++)
+	//	{
+	//		bool IsPossible = CheckPossibility(x, y);
 
-			// found location stone can be put on
-			if (IsPossible)
-			{
-				return false;
-			}
-			// find more possible location
-			else if (!IsPossible && count < Size * Size - 1)
-			{
-				count++;
-			}
-			// there is no location stone can be put on
-			else
-			{
-				GameMode->OmitTurn();
-				if (GameMode->GetTurnOmit()) return true;
-			}
-		}
-	}
+	//		// found location stone can be put on
+	//		if (IsPossible)
+	//		{
+	//			return false;
+	//		}
+	//		// find more possible location
+	//		else if (!IsPossible && count < Size * Size - 1)
+	//		{
+	//			count++;
+	//		}
+	//		// there is no location stone can be put on
+	//		else
+	//		{
+	//			GameMode->OmitTurn();
+	//			if (GameMode->GetTurnOmit()) return true;
+	//		}
+	//	}
+	//}
 
-	// Check whether board is full of stones
+	// Check whether stones can be put
 	UpdatePutablePosition();
 	for (int i = 0; i < Size * Size; i++)
 		if (IsPutable[i])
 			return false;
+
+	if (!GameMode->GetTurnOmit())
+	{
+		GameMode->OmitTurn();
+		return false;
+	}
 
 	return true;
 }
@@ -681,14 +687,14 @@ int AOthelloBlockGrid::GetRoundNumber()
 	return (int)GameMode->GetTurnCount() / 2;
 }
 
-TArray<int> AOthelloBlockGrid::GetState()
+TArray<float> AOthelloBlockGrid::GetState()
 {
-	TArray<int> StateArray;
+	TArray<float> StateArray;
 
 	for(int y = 0; y < Size; y++)
 		for (int x = 0; x < Size; x++)
 		{
-			StateArray.Add((int)GetBlock(x, y)->GetStoneColor());
+			StateArray.Add((float)GetBlock(x, y)->GetStoneColor());
 		}
 
 	return StateArray;

@@ -17,10 +17,10 @@ AOthelloGameMode::AOthelloGameMode()
 int AOthelloGameMode::OmitTurn()
 {
 	// game is over if previous turn is omitted for reason that previous player can't put stone on any location
-	if (IsTurnOmitted) GameOver();
+	// if (IsTurnOmitted) GameOver();
 	// checksum reset if not
-	else IsTurnOmitted = true;
-
+	// else IsTurnOmitted = true;
+	IsTurnOmitted = true;
 	if (GameTurn == ETurn::White) GameTurn = ETurn::Black;
 	else if (GameTurn == ETurn::Black) GameTurn = ETurn::White;
 

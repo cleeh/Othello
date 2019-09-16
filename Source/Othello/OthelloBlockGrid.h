@@ -29,7 +29,7 @@ public:
 
 	/** Number of blocks along each side of grid */
 	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadOnly)
-	int32 Size;
+	static int32 Size;
 
 	/** Spacing of blocks */
 	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadOnly)
@@ -101,4 +101,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Tensorflow")
 	bool IsGameOver();
+
+#pragma region Minimax Algorithm
+	TArray<EStoneColor> AOthelloBlockGrid::GetTreeNodeScore(TArray<EStoneColor> board, uint8 stone_x, uint8 stone_y, int& changed_number);
+	void AOthelloBlockGrid::GetTreeNodeScore()
+#pragma endregion
 };

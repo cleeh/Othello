@@ -16,18 +16,18 @@ WHITE = 2
 # about Hypothesis
 GRIDS = 8
 INPUTS = GRIDS * GRIDS
-HIDDEN1S = 800
-#HIDDEN2S = 500
+HIDDEN1S = INPUTS * 2
+HIDDEN2S = HIDDEN1S
 OUTPUTS = GRIDS * GRIDS
 
 # about Learning
-LEARNINGRATE = 0.0000445
-DISCOUNT = 0.9
-EPSILONMINVALUE = 0.005
+LEARNINGRATE = 1e-45
+DISCOUNT = 0.95
+EPSILONMINVALUE = 0.01
 
 # about ReplayMemory
-MAXMEMORY = 200
-MAXBATCHSIZE = 50
+MAXMEMORY = INPUTS * 2
+MAXBATCHSIZE = INPUTS
 #=================================================#
 
 
@@ -57,7 +57,7 @@ class ReplayMemory:
 		self.Pointer = (self.Pointer + 1) % MAXMEMORY
 		pass
 
-	def getBatch(self, sess, model, input_placeholder):
+	def getBatch(self, sess, model_t, input_placeholder):
 		BatchSize = min(self.Count, MAXBATCHSIZE)
 		Inputs = np.zeros((BatchSize, INPUTS))
 		Targets = np.zeros((BatchSize, OUTPUTS))
@@ -71,10 +71,10 @@ class ReplayMemory:
 			RandomIndex = random.randrange(1, Length)
 
 			CurrentState = np.reshape(self.CurrentState[RandomIndex], (1, INPUTS))
-			Target = sess.run(model, feed_dict={input_placeholder: CurrentState})
+			Target = sess.run(model_t, feed_dict={input_placeholder: CurrentState})
 
 			NextState = np.reshape(self.NextState[RandomIndex], (1, INPUTS))
-			Output = sess.run(model, feed_dict={input_placeholder: NextState})
+			Output = sess.run(model_t, feed_dict={input_placeholder: NextState})
 
 			# Gives max Q-value for the next state
 			if(self.IsGameOver[RandomIndex] == True):
@@ -100,11 +100,11 @@ class ExampleAPI(TFPluginAPI):
 		self.model_path = self.model_directory + "/model.ckpt"	
 
 		# Game
-		self.Sequence = 0
-		self.PlayNumber = 0
+		self.Sequence = 1
+		self.PlayNumber = 1
 
 		# Epsilon
-		self.Epsilon = 1
+		self.Epsilon = EPSILONMINVALUE
 
 		# ReplayMemory
 		self.Memory = ReplayMemory()
@@ -116,27 +116,38 @@ class ExampleAPI(TFPluginAPI):
 		#==================== Hypothesis ====================#
 		self.input = tf.placeholder(tf.float32, shape=[None, INPUTS])
 
-		w1 = tf.Variable(tf.truncated_normal(shape=[INPUTS, HIDDEN1S], stddev=1.0), dtype=tf.float32, name='w1')
+		# Model
+		w1 = tf.Variable(tf.truncated_normal(shape=[INPUTS, HIDDEN1S], stddev=1.0 / math.sqrt(float(INPUTS))), dtype=tf.float32, name='w1')
 		b1 = tf.Variable(tf.truncated_normal(shape=[HIDDEN1S], stddev=0.01), dtype=tf.float32, name='b1')
 		hidden1 = tf.nn.relu(tf.matmul(self.input, w1) + b1, name='hidden1')
 
-		#w2 = tf.Variable(tf.truncated_normal(shape=[HIDDEN1S, HIDDEN2S], stddev=1.0), dtype=tf.float32, name='w2')
-		#b2 = tf.Variable(tf.truncated_normal(shape=[HIDDEN2S], stddev=0.01), dtype=tf.float32, name='b2')
-		#hidden2 = tf.nn.relu(tf.matmul(hidden1, w2) + b2, name='hidden2')
+		w2 = tf.Variable(tf.truncated_normal(shape=[HIDDEN1S, HIDDEN2S], stddev=1.0 / math.sqrt(float(HIDDEN1S))), dtype=tf.float32, name='w2')
+		b2 = tf.Variable(tf.truncated_normal(shape=[HIDDEN2S], stddev=0.01), dtype=tf.float32, name='b2')
+		hidden2 = tf.nn.relu(tf.matmul(hidden1, w2) + b2, name='hidden2')
 
-		wo = tf.Variable(tf.truncated_normal(shape=[HIDDEN1S, OUTPUTS], stddev=1.0), dtype=tf.float32, name='wo')
+		wo = tf.Variable(tf.truncated_normal(shape=[HIDDEN2S, OUTPUTS], stddev=1.0 / math.sqrt(float(HIDDEN2S))), dtype=tf.float32, name='wo')
 		bo = tf.Variable(tf.truncated_normal(shape=[OUTPUTS], stddev=0.01), dtype=tf.float32, name='bo')
-		self.output = tf.matmul(hidden1, wo) + bo
-		#self.output = tf.matmul(hidden2, wo) + bo
+		self.output = tf.matmul(hidden2, wo) + bo
 
-		self.target = tf.placeholder(tf.float32, shape=[None, OUTPUTS])
+		# Target
+		w1_t = tf.Variable(tf.truncated_normal(shape=[INPUTS, HIDDEN1S], stddev=1.0 / math.sqrt(float(INPUTS))), dtype=tf.float32, name='w1_t')
+		b1_t = tf.Variable(tf.truncated_normal(shape=[HIDDEN1S], stddev=0.01), dtype=tf.float32, name='b1_t')
+		hidden1_t = tf.nn.relu(tf.matmul(self.input, w1_t) + b1_t, name='hidden1')
 
-		#==================== Final Process ====================#
+		w2_t = tf.Variable(tf.truncated_normal(shape=[HIDDEN1S, HIDDEN2S], stddev=1.0 / math.sqrt(float(HIDDEN1S))), dtype=tf.float32, name='w2_t')
+		b2_t = tf.Variable(tf.truncated_normal(shape=[HIDDEN2S], stddev=0.01), dtype=tf.float32, name='b2_t')
+		hidden2_t = tf.nn.relu(tf.matmul(hidden1_t, w2_t) + b2_t, name='hidden2')
+
+		wo_t = tf.Variable(tf.truncated_normal(shape=[HIDDEN2S, OUTPUTS], stddev=1.0 / math.sqrt(float(HIDDEN2S))), dtype=tf.float32, name='wo_t')
+		bo_t = tf.Variable(tf.truncated_normal(shape=[OUTPUTS], stddev=0.01), dtype=tf.float32, name='bo_t')
+		self.output_t = tf.matmul(hidden2_t, wo_t) + bo_t
+
 		# Cost & Optimizer
+		self.target = tf.placeholder(tf.float32, shape=[None, OUTPUTS])
 		self.cost = tf.reduce_mean(tf.square(self.output - self.target)) / 2
-		self.optimizer = tf.train.GradientDescentOptimizer(LEARNINGRATE).minimize(self.cost)
+		self.optimizer = tf.train.AdamOptimizer(LEARNINGRATE).minimize(self.cost)
 
-		# Session & Saver
+		#==================== Session & Saver ====================#
 		self.sess = tf.Session()
 		self.saver = tf.train.Saver()
 		ue.log('######################################################')
@@ -147,7 +158,6 @@ class ExampleAPI(TFPluginAPI):
 			self.sess.run(tf.global_variables_initializer())
 			ue.log('################## no stored model ##################')
 		ue.log('######################################################')
-
 		pass
 
 	def onJsonInput(self, jsonInput):
@@ -158,51 +168,48 @@ class ExampleAPI(TFPluginAPI):
 		Putable = jsonInput["putable"]
 
 		action = -1
-		#if(IsGameOver):
-			#action = self.LastAction
-		#else:
 		PutableList = []
 		for i in range(INPUTS):
 			if(Putable[i]):
 				PutableList.append(i)
 		if(len(PutableList) <= 0):
 			return -1
-
-		self.Sequence += 1
+		#===============================================#
+		
 		ue.log('==================================== ' + str(self.Sequence) + ' ====================================')
+		self.Sequence += 1
 
 		selector = random.random()
 		if (selector <= self.Epsilon):
 			index = random.randrange(0, len(PutableList))
-			if(index > 0):
-				index -= 1
 			action = PutableList[index]
 			ue.log('#Random: ' + str(action))
 		else:
 			q = self.sess.run(self.output, feed_dict={self.input: NewState})
 			action = q.argmax()
+
+			flag = 1
 			ue.log('#DQN: ' + str(action))
 			for i in range(len(PutableList)):
 				if(action == PutableList[i]):
+					flag = 0
 					break
-			index = random.randrange(0, len(PutableList))
-			action = PutableList[index]
-			ue.log('-> Random: (' + str(action) + ')')
+			if(flag):
+				self.giveDifference(NewState, action, q, -10.0)
+				index = random.randrange(0, len(PutableList))
+				action = PutableList[index]
+				ue.log('-> Random: (' + str(action) + ')')
 			ue.log('==================================== Actions ====================================')
 			ue.log(q)
-		Reward += 1
 
 		# Decay the epsilon by multiplying by 0.999, not allowing it to go below a certain threshold.
 		if(self.Epsilon > EPSILONMINVALUE):
 			self.Epsilon *= 0.999
 
 		# We get a batch of training data to train the model.
-		Inputs, Targets = self.Memory.getBatch(self.sess, self.output, self.input)
+		Inputs, Targets = self.Memory.getBatch(self.sess, self.output_t, self.input)
 
 		_, loss = self.sess.run([self.optimizer, self.cost], feed_dict={self.input: Inputs, self.target: Targets})
-		ue.log('==================================== Targets ====================================')
-		ue.log(Targets)
-
 		ue.log('==================================== loss ====================================')
 		ue.log(loss)
 
@@ -213,14 +220,13 @@ class ExampleAPI(TFPluginAPI):
 		return int(action)
 
 	def onBeginTraining(self):
-		if(self.Sequence % 100 == 0):
+		if(self.PlayNumber % 100 == 0):
 			self.saver.save(self.sess, self.model_path)
 			ue.log('############################## saved model ##############################')
-
-		self.reset()
-		self.PlayNumber += 1
 		ue.log('############################## PlayNumber: ' + str(self.PlayNumber) + '##############################')
 
+		self.PlayNumber += 1
+		self.reset()
 		return {}
 
 	def reset(self):
@@ -229,6 +235,13 @@ class ExampleAPI(TFPluginAPI):
 		self.State[0][36] = BLACK
 		self.State[0][28] = WHITE
 		self.State[0][35] = WHITE
+		pass
+
+	def giveDifference(self, state, action, output, correction):
+		Input = np.reshape(state, (1, INPUTS))
+		Target = output.copy()
+		Target[0, [action]] += correction
+		self.sess.run(self.optimizer, feed_dict={self.input: Input, self.target: Target})
 		pass
 
 

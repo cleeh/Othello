@@ -35,7 +35,7 @@ void AOthelloBlockGrid::BeginPlay()
 	IsPutable.SetNum(NumBlocks);
 
 	// Loop to spawn each block
-	for (int32 BlockIndex = 0; BlockIndex<NumBlocks; BlockIndex++)
+	for (int32 BlockIndex = 0; BlockIndex < NumBlocks; BlockIndex++)
 	{
 		const float XOffset = (BlockIndex % Size) * BlockSpacing;
 		const float YOffset = (BlockIndex / Size) * BlockSpacing;
@@ -691,7 +691,7 @@ TArray<float> AOthelloBlockGrid::GetState()
 {
 	TArray<float> StateArray;
 
-	for(int y = 0; y < Size; y++)
+	for (int y = 0; y < Size; y++)
 		for (int x = 0; x < Size; x++)
 		{
 			StateArray.Add((float)GetBlock(x, y)->GetStoneColor());
@@ -712,4 +712,5 @@ void AOthelloBlockGrid::UpdatePutablePosition()
 	for (int i = 0; i < Size * Size; i++)
 		IsPutable[i] = CheckPossibility(i % Size, i / Size);
 }
+
 #undef LOCTEXT_NAMESPACE
